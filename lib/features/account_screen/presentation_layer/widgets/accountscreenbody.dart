@@ -196,14 +196,14 @@ class _AccountBodyState extends State<AccountBody> {
           /// كلمة مرحباً
           Positioned(
             top: 32.h,
-            left: 187.w,
-            right: 0,
+            right: 20.w,
             child: Center(
               child: Text(
-                'مرحباً',
+              'مرحباً ',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 40.sp,
+                  fontSize: 35.sp,
+                  fontFamily: AppFonts.mainfontName,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -213,8 +213,7 @@ class _AccountBodyState extends State<AccountBody> {
           /// صورة المستخدم والاسم
           Positioned(
             top: 118.h,
-            left: 130.w,
-            right: 10.w,
+            right: 20.w,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.center,

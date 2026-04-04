@@ -35,7 +35,7 @@ class AboutScreenBody extends StatelessWidget {
 
             /// العنوان
             Text(
-              'ايماءة',
+              'إيماءة',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: const Color(0xFF248DBC),

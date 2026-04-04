@@ -17,25 +17,26 @@ class SplashScreenBody extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          /// Background image
-          Column(
-            children: [
-              HeightSpace(50.h),
-              Image.asset(
-                AppAssets.LoginImage,
-                width: 375.w,
-                height: 240.h,
-                fit: BoxFit.fill,
-              ),
-            ],
+          /// Background image  ← الفيكس هنا: SizedBox بدل Column
+          Positioned(
+            top: 50.h,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              AppAssets.LoginImage,
+              width: double.infinity,
+              height: 240.h,
+              fit: BoxFit.fill,
+            ),
           ),
 
           /// SVG Shape
           Positioned(
-            top: 430.h,
-            left: -20.w,
+            top: 370.h,
+            left:-33.w,
+            right: -5.w,
             child: SizedBox(
-              width: double.infinity,
+              width: 409.w,
               height: 470.h,
               child: SvgPicture.asset(
                 'assets/icons/my_shape.svg',
@@ -89,7 +90,7 @@ class SplashScreenBody extends StatelessWidget {
 
           /// Buttons
           Positioned(
-            top: 601.h,
+            top: 585.h,
             left: 47.w,
             child: Column(
               children: [

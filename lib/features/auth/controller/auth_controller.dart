@@ -254,7 +254,7 @@ class AuthController extends GetxController {
       userEmail.value = email.trim();
 
       final response = await http.post(
-        Uri.parse("https://ema2a.mooo.com/api/Auth/get-reset-password-token"),
+        Uri.parse("https://backup.ema2a.website/api/Auth/get-reset-password-token"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"email": email.trim()}),
       );
@@ -297,7 +297,7 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       final response = await http.post(
-        Uri.parse("https://ema2a.mooo.com/api/Auth/get-reset-password-token"),
+        Uri.parse("https://backup.ema2a.website/api/Auth/get-reset-password-token"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"email": userEmail.value}),
       );
@@ -348,7 +348,7 @@ class AuthController extends GetxController {
       print("New Password: $newPassword");
 
       final response = await http.post(
-        Uri.parse("https://ema2a.mooo.com/api/Auth/reset-password"),
+        Uri.parse("https://backup.ema2a.website/api/Auth/reset-password"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "OTP": userOtp.value,

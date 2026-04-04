@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:graduationproject/core/style/app_assets.dart';
 import 'package:graduationproject/core/widgets/custom_back_button.dart';
-import 'package:graduationproject/features/search_screen/presentation_layer/searchscreenview.dart';
 
 class Dictionaryscreenbody extends StatelessWidget {
   const Dictionaryscreenbody({super.key});
@@ -19,24 +18,16 @@ class Dictionaryscreenbody extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 8.h),
-
+                SizedBox(height: 5.h),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CustomBackButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const Searchscreenview(),
-                        ),
-                      );
+                      Navigator.pop(context);
                     },
                   ),
                 ),
-
-                SizedBox(height: 3.h),
-
+                SizedBox(height: 0.h),
                 Text(
                   'المعجم الإرشادي',
                   textAlign: TextAlign.center,
@@ -47,10 +38,11 @@ class Dictionaryscreenbody extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
               ],
             ),
           ),
+
+          SizedBox(height: 20.h), // ← تصحيح sizebox → SizedBox
 
           SizedBox(
             height: 1150.h,
@@ -58,6 +50,7 @@ class Dictionaryscreenbody extends StatelessWidget {
             child: Image.asset(
               AppAssets.Dicscreen,
               fit: BoxFit.fitWidth,
+              alignment: Alignment.topCenter,
             ),
           ),
         ],

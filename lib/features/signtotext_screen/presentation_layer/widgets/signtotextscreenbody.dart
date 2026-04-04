@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import 'package:graduationproject/core/style/app_assets.dart';
+import 'package:graduationproject/core/widgets/custom_back_button.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
@@ -39,8 +38,8 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
   int _reconnectAttempts = 0;
   final int _maxReconnectAttempts = 5;
 
-  final String _serverUrl = "https://ema2a.mooo.com/signHub";
-  final String _apiBaseUrl = "https://ema2a.mooo.com";
+  final String _serverUrl = "https://backup.ema2a.website/signHub";
+  final String _apiBaseUrl = "https://backup.ema2a.website";
 
   // --- App State ---
   String _detectionText = "جاري الاتصال...";
@@ -427,9 +426,9 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Get.back(),
+         automaticallyImplyLeading:true,
+        leading: CustomBackButton(
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'إشارة إلى نص',

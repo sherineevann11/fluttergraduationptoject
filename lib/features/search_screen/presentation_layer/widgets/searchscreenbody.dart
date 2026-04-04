@@ -4,10 +4,10 @@ import 'package:graduationproject/core/style/app_assets.dart';
 import 'package:graduationproject/core/widgets/primary_button.dart';
 import 'package:graduationproject/core/widgets/primary_outlined_button.dart';
 import 'package:graduationproject/core/widgets/spacing_widgets.dart';
-import 'package:graduationproject/core/widgets/custom_back_button.dart';
 import 'package:graduationproject/features/Aboutapp_screen/presentation_layer/AboutAppview.dart';
 import 'package:graduationproject/features/Dictionary_screen/presentation_layer/Dictionaryscreenview.dart';
 import 'package:graduationproject/features/choice_screen/presentation_layer/choicescreenview.dart';
+import 'package:graduationproject/features/howtouse_screen/presentation_layer/howtousescreenview.dart';
 
 class Searchscreenbody extends StatelessWidget {
   const Searchscreenbody({super.key});
@@ -17,7 +17,7 @@ class Searchscreenbody extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          /// Top Image with Back Button
+          /// Top Image
           Stack(
             children: [
               Image.asset(
@@ -25,11 +25,6 @@ class Searchscreenbody extends StatelessWidget {
                 width: 408.w,
                 height: 269.h,
                 fit: BoxFit.cover,
-              ),
-              Positioned(
-                top: 8.h,
-                left: 5.w,
-                child: CustomBackButton(),
               ),
             ],
           ),
@@ -51,7 +46,15 @@ class Searchscreenbody extends StatelessWidget {
                     fontSize: 20.sp,
                     buttonColor: const Color(0x2630BBF9),
                     textColor: Colors.black,
-                    onPress: () {},
+                    onPress: () {
+                      Navigator.of(context, rootNavigator: false).push(
+                        MaterialPageRoute(
+                          builder: (_) => Howtousescreenview(),
+                        ),
+                      );
+
+
+                    },
                   ),
                 ),
                 Positioned(
@@ -64,12 +67,11 @@ class Searchscreenbody extends StatelessWidget {
                     buttonColor: const Color(0x2630BBF9),
                     width: 272.w,
                     onPress: () {
-                       Navigator.push(
-                     context,
-                   MaterialPageRoute(
-                builder: (_) => const AboutScreenView(),
-                ),
-                );
+                      Navigator.of(context, rootNavigator: false).push(
+                        MaterialPageRoute(
+                          builder: (_) => const AboutScreenView(),
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -83,14 +85,11 @@ class Searchscreenbody extends StatelessWidget {
                     buttonColor: const Color(0x2630BBF9),
                     textColor: Colors.black,
                     onPress: () {
-                    Navigator.push(
-                     context,
-                   MaterialPageRoute(
-                builder: (_) => const Dictionaryscreenview(),
-                ),
-                );
-
-
+                      Navigator.of(context, rootNavigator: false).push(
+                        MaterialPageRoute(
+                          builder: (_) => const Dictionaryscreenview(),
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -108,11 +107,10 @@ class Searchscreenbody extends StatelessWidget {
               buttonText: 'ابدأ الان',
               fontSize: 18.sp,
               onPress: () {
-                Navigator.push(
-                     context,
-                   MaterialPageRoute(
-                builder: (_) => Choicescreenview(),
-                ),
+                Navigator.of(context, rootNavigator: false).push(
+                  MaterialPageRoute(
+                    builder: (_) => Choicescreenview(),
+                  ),
                 );
               },
             ),

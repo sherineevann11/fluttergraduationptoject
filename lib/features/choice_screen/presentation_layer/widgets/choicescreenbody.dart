@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graduationproject/core/widgets/custom_back_button.dart';
 import 'package:graduationproject/core/widgets/custom_button.dart';
 import 'package:graduationproject/features/signtotext_screen/presentation_layer/widgets/signtotextscreenbody.dart';
 import 'package:graduationproject/features/texttosign_screen/presentation_layer/texttosignscreenview.dart';
@@ -13,11 +14,11 @@ class Choicescreenbody extends StatelessWidget {
         children: [
           /// -------- Background Image ----------
           Positioned.fill(
-              child: Image.asset(
-                'assets/images/choice_screen.png',
-                fit: BoxFit.cover,
-              ),
+            child: Image.asset(
+              'assets/images/choice_screen.png',
+              fit: BoxFit.cover,
             ),
+          ),
 
           /// -------- Main Content ----------
           SizedBox.expand(
@@ -27,13 +28,10 @@ class Choicescreenbody extends StatelessWidget {
                 children: [
                   const SizedBox(height: 60),
 
-                  /// Back Arrow
+                  /// Back Button
                   Align(
                     alignment: Alignment.topLeft,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, size: 30),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                    child: CustomBackButton(),
                   ),
 
                   const Spacer(),
@@ -55,8 +53,7 @@ class Choicescreenbody extends StatelessWidget {
                       CustomButton(
                         text: "إشارة إلى نص",
                         onPressed: () {
-                          Navigator.push(
-                            context,
+                          Navigator.of(context, rootNavigator: false).push(
                             MaterialPageRoute(
                               builder: (_) => const Signtotextscreenview(),
                             ),
@@ -69,8 +66,7 @@ class Choicescreenbody extends StatelessWidget {
                       CustomButton(
                         text: "نص إلى إشارة",
                         onPressed: () {
-                          Navigator.push(
-                            context,
+                          Navigator.of(context, rootNavigator: false).push(
                             MaterialPageRoute(
                               builder: (_) => const TextToSignScreenView(),
                             ),
