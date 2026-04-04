@@ -8,7 +8,7 @@ class AuthService {
   AuthService() {
     _dio = dio.Dio(
       dio.BaseOptions(
-        baseUrl: "https://ema2a.mooo.com/api",
+        baseUrl: "https://backup.ema2a.website/api",
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         validateStatus: (status) => status != null && status < 500,
@@ -240,7 +240,7 @@ class AuthService {
   }
 
   Future<void> loginWithGoogle() async {
-    const url = "https://ema2a.mooo.com/api/Auth/login-google";
+    const url = "https://backup.ema2a.website/api/Auth/login-google";
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);

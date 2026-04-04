@@ -15,7 +15,7 @@ class AppAssets {
   static const String Dicscreen = 'assets/images/dict_screen.png';
   static const String MicVoice = 'assets/icons/microphone voice.svg';
   static const String MicLine = 'assets/icons/microphone-line.svg';
-  static const String Texticone = 'assets/icons/text icon.svg';
+  static const String Texticone = 'assets/icons/text_icon.svg';
   static const String Camera = 'assets/icons/camerasigntotext.svg';
   static const String LoginImage = 'assets/images/loginimage.png';
 }
