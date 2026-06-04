@@ -14,11 +14,11 @@ class Dictionaryscreenbody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            padding: EdgeInsets.symmetric(horizontal: 13.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 5.h),
+                SizedBox(height: 3.h),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CustomBackButton(
@@ -42,7 +42,7 @@ class Dictionaryscreenbody extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 20.h), // ← تصحيح sizebox → SizedBox
+          SizedBox(height: 15.h), // ← تصحيح sizebox → SizedBox
 
           SizedBox(
             height: 1150.h,

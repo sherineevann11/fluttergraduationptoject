@@ -35,7 +35,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
   }
 
   void _onRegisterPressed() {
-    // ✅ تحقق من الحقول الفاضية
+   
     if (fullNameController.text.isEmpty ||
         phoneController.text.isEmpty ||
         userNameController.text.isEmpty ||
@@ -47,7 +47,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
       return;
     }
 
-    // ✅ تحقق من الباسورد
+    
     if (!RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{6,}$')
         .hasMatch(passwordController.text)) {
       Get.snackbar(
@@ -60,14 +60,14 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
       return;
     }
 
-    // ✅ تحقق من تطابق كلمة المرور
+    
     if (passwordController.text != confirmPasswordController.text) {
       Get.snackbar('خطأ', 'كلمتا المرور غير متطابقتين',
           backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
-    // ✅ ابعت الطلب
+   
     controller.register(
       email: emailController.text.trim(),
       fullName: fullNameController.text.trim(),

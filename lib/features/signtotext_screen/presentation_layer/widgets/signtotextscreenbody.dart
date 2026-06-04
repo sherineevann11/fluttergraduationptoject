@@ -25,13 +25,11 @@ class Signtotextscreenview extends StatefulWidget {
 }
 
 class _SigntotextscreenviewState extends State<Signtotextscreenview> {
-  // --- Camera ---
   CameraController? _cameraController;
   Timer? _frameProcessingTimer;
   bool _isStreaming = false;
   bool _isProcessingFrame = false;
 
-  // --- SignalR ---
   HubConnection? _hubConnection;
   bool _isConnected = false;
   bool _isReconnecting = false;
@@ -41,7 +39,6 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
   final String _serverUrl = "https://backup.ema2a.website/signHub";
   final String _apiBaseUrl = "https://backup.ema2a.website";
 
-  // --- App State ---
   String _detectionText = "جاري الاتصال...";
   String _currentWord = "";
   String _currentSentence = "";
@@ -66,9 +63,6 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
     _initializeSignalR();
   }
 
-  // ============================================================
-  // 1. SignalR
-  // ============================================================
   Future<void> _initializeSignalR() async {
     _hubConnection = HubConnectionBuilder()
         .withUrl(_serverUrl)
@@ -80,15 +74,12 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         final String message = arguments[0].toString();
         debugPrint("==== Server sent: '$message' ====");
         if (!mounted) return;
-
         setState(() => _detectionText = message.isEmpty
             ? 'لم يتم اكتشاف إشارة (حاول تعديل اليد)'
             : message);
-
         if (arabicLabels.contains(message)) {
           final int now = DateTime.now().millisecondsSinceEpoch;
-          if (message != _lastPrediction ||
-              (now - _lastPredictionTime) > cooldownMs) {
+          if (message != _lastPrediction || (now - _lastPredictionTime) > cooldownMs) {
             setState(() {
               _currentWord += message;
               _lastPrediction = message;
@@ -117,9 +108,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       setState(() {
         _isConnected = true;
         _isReconnecting = false;
-        _detectionText = _isStreaming
-            ? "الكاميرا تعمل، يتم اكتشاف الحروف..."
-            : "تم الاتصال. شغلي الكاميرا";
+        _detectionText = _isStreaming ? "الكاميرا تعمل، يتم اكتشاف الحروف..." : "تم الاتصال. شغلي الكاميرا";
       });
       if (_isStreaming) _startFrameCapture();
     });
@@ -133,9 +122,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         _detectionText = "انقطع الاتصال";
       });
       _frameProcessingTimer?.cancel();
-      if (_reconnectAttempts < _maxReconnectAttempts) {
-        _scheduleManualReconnect();
-      }
+      if (_reconnectAttempts < _maxReconnectAttempts) _scheduleManualReconnect();
     });
 
     await _connectToHub();
@@ -172,21 +159,16 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
     }
     _reconnectAttempts++;
     final int delay = _reconnectAttempts * 3;
-    debugPrint("Manual reconnect attempt $_reconnectAttempts in ${delay}s");
     Future.delayed(Duration(seconds: delay), () {
       if (mounted && !_isConnected && !_isReconnecting) _connectToHub();
     });
   }
 
-  // ============================================================
-  // 2. Camera
-  // ============================================================
   Future<void> _startCamera() async {
     if (!_isConnected) {
       _showSnackBar("غير متصل بالسيرفر. انتظر...", Colors.orange);
       return;
     }
-
     if (globalCameras.isEmpty) {
       try {
         globalCameras = await availableCameras();
@@ -195,7 +177,6 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         return;
       }
     }
-
     if (globalCameras.isEmpty) return;
 
     final CameraDescription frontCamera = globalCameras.firstWhere(
@@ -222,13 +203,9 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       _isStreaming = true;
       _detectionText = "الكاميرا تعمل، يتم اكتشاف الحروف...";
     });
-
     _startFrameCapture();
   }
 
-  // ============================================================
-  // 3. Frame Capture
-  // ============================================================
   void _startFrameCapture() {
     _frameProcessingTimer?.cancel();
     _frameProcessingTimer = Timer.periodic(
@@ -238,7 +215,9 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
             _hubConnection?.state != HubConnectionState.Connected ||
             _isProcessingFrame ||
             _cameraController == null ||
-            !_cameraController!.value.isInitialized) return;
+            !_cameraController!.value.isInitialized) {
+          return;
+        }
 
         _isProcessingFrame = true;
         try {
@@ -246,27 +225,19 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
           final List<int> rawBytes = await imageFile.readAsBytes();
           final List<int> compressedBytes = await _compressImage(rawBytes);
           final String base64Image = base64Encode(compressedBytes);
-
           debugPrint("✅ Sending frame (${(compressedBytes.length / 1024).toStringAsFixed(1)} KB)");
-
           await _hubConnection!.invoke(
             "ProcessFrame",
             args: [{"ImageData": "data:image/jpeg;base64,$base64Image"}],
-          ).timeout(
-            const Duration(seconds: 5),
-            onTimeout: () {
-              debugPrint("⚠️ Frame send timeout");
-              return null;
-            },
-          );
+          ).timeout(const Duration(seconds: 5), onTimeout: () {
+            debugPrint("⚠️ Frame send timeout");
+            return null;
+          });
         } catch (e) {
           debugPrint("❌ Error capturing or sending frame: $e");
-          if (e.toString().contains("Connection") ||
-              e.toString().contains("closed")) {
+          if (e.toString().contains("Connection") || e.toString().contains("closed")) {
             _frameProcessingTimer?.cancel();
-            if (mounted) {
-              setState(() => _detectionText = "انقطع الاتصال، جاري إعادة الاتصال...");
-            }
+            if (mounted) setState(() => _detectionText = "انقطع الاتصال، جاري إعادة الاتصال...");
           }
         } finally {
           _isProcessingFrame = false;
@@ -282,7 +253,6 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       final img.Image resized = img.copyResize(image, width: 320, height: 240);
       return img.encodeJpg(resized, quality: 70);
     } catch (e) {
-      debugPrint("Compression failed, using original: $e");
       return rawBytes;
     }
   }
@@ -300,9 +270,6 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
     }
   }
 
-  // ============================================================
-  // 4. Actions
-  // ============================================================
   void _newWord() {
     if (_currentWord.isNotEmpty) {
       setState(() {
@@ -324,8 +291,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
   }
 
   Future<void> _correctSentence() async {
-    final String textToSend =
-        _currentSentence.isNotEmpty ? _currentSentence : _currentWord;
+    final String textToSend = _currentSentence.isNotEmpty ? _currentSentence : _currentWord;
     if (textToSend.isEmpty) {
       _showSnackBar("لا يوجد نص للتصحيح", Colors.orange);
       return;
@@ -337,7 +303,6 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"sentence": textToSend}),
       ).timeout(const Duration(seconds: 10));
-
       final result = jsonDecode(response.body);
       if (result['success'] == true && result['data'] != null) {
         setState(() => _currentSentence = result['data']);
@@ -355,8 +320,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
   }
 
   Future<void> _generateAudio() async {
-    final String textToSend =
-        _currentSentence.isNotEmpty ? _currentSentence : _currentWord;
+    final String textToSend = _currentSentence.isNotEmpty ? _currentSentence : _currentWord;
     if (textToSend.isEmpty) {
       _showSnackBar("لا يوجد نص لإنشاء الصوت", Colors.orange);
       return;
@@ -368,17 +332,14 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"text": textToSend}),
       ).timeout(const Duration(seconds: 15));
-
       final result = jsonDecode(response.body);
       if (result['success'] == true) {
         final String base64Audio = result['data']['audioData'];
         final int sampleRate = result['data']['sampleRate'];
         final Uint8List pcmBytes = base64Decode(base64Audio);
         final Uint8List wavBytes = addWavHeader(pcmBytes, sampleRate);
-
         final Directory tempDir = await getTemporaryDirectory();
-        final String fileName =
-            'audio_${DateTime.now().millisecondsSinceEpoch}.wav';
+        final String fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.wav';
         final File tempFile = File('${tempDir.path}/$fileName');
         await tempFile.writeAsBytes(wavBytes);
         await _audioPlayer.play(DeviceFileSource(tempFile.path));
@@ -398,11 +359,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
   void _showSnackBar(String message, Color color) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        duration: const Duration(seconds: 2),
-      ),
+      SnackBar(content: Text(message), backgroundColor: color, duration: const Duration(seconds: 2)),
     );
   }
 
@@ -415,9 +372,6 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
     super.dispose();
   }
 
-  // ============================================================
-  // UI
-  // ============================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -426,10 +380,12 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-         automaticallyImplyLeading:true,
-        leading: CustomBackButton(
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          CustomBackButton(
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
         title: Text(
           'إشارة إلى نص',
           style: TextStyle(
@@ -449,8 +405,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                 Container(
                   width: double.infinity,
                   height: 262.h,
-                  margin:
-                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.r),
                     color: Colors.black12,
@@ -459,21 +414,15 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                   child: _isStreaming &&
                           _cameraController != null &&
                           _cameraController!.value.isInitialized
-                      ? Transform.scale(
-                          scaleX: -1,
-                          child: CameraPreview(_cameraController!))
+                      ? Transform.scale(scaleX: -1, child: CameraPreview(_cameraController!))
                       : Center(
-                          child: SvgPicture.asset(
-                            AppAssets.Camera,
-                            width: 60.w,
-                            height: 60.h,
-                          )),
+                          child: SvgPicture.asset(AppAssets.Camera, width: 60.w, height: 60.h),
+                        ),
                 ),
                 if (_isStreaming)
                   Positioned.fill(
                     child: Container(
-                      margin: EdgeInsets.symmetric(
-                          horizontal: 16.w, vertical: 8.h),
+                      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20.r),
@@ -520,8 +469,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                           child: SizedBox(
                             width: 12.w,
                             height: 12.h,
-                            child: const CircularProgressIndicator(
-                                strokeWidth: 2),
+                            child: const CircularProgressIndicator(strokeWidth: 2),
                           ),
                         ),
                       const Spacer(),
@@ -531,11 +479,8 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                             _reconnectAttempts = 0;
                             _connectToHub();
                           },
-                          child: Text(
-                            "إعادة الاتصال",
-                            style: TextStyle(
-                                fontSize: 11.sp, color: Colors.blue),
-                          ),
+                          child: Text("إعادة الاتصال",
+                              style: TextStyle(fontSize: 11.sp, color: Colors.blue)),
                         ),
                     ],
                   ),
@@ -547,17 +492,12 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomButton(
-                        buttonText:
-                            _isStreaming ? 'أوقف الكاميرا' : 'شغل الكاميرا',
+                        buttonText: _isStreaming ? 'أوقف الكاميرا' : 'شغل الكاميرا',
                         width: 140.w,
                         height: 39.h,
                         borderRadius: 19.r,
-                        buttonColor: _isStreaming
-                            ? Colors.grey
-                            : const Color(0xFF30BBF9),
-                        onPress: _isStreaming
-                            ? _stopCamera
-                            : (_isConnected ? _startCamera : null),
+                        buttonColor: _isStreaming ? Colors.grey : const Color(0xFF30BBF9),
+                        onPress: _isStreaming ? _stopCamera : (_isConnected ? _startCamera : null),
                       ),
                       if (_isStreaming)
                         Flexible(
@@ -580,41 +520,19 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
 
                   SizedBox(height: 16.h),
 
-                  // ── Detection Box ──
                   _infoBox(value: _detectionText, hasBorder: false),
-
                   SizedBox(height: 12.h),
-
-                  // ── Current Word ──
-                  _infoBox(
-                    label: 'الحرف / الكلمة المكونة:',
-                    value: _currentWord.isEmpty ? '' : _currentWord,
-                  ),
-
+                  _infoBox(label: 'الحرف / الكلمة المكونة:', value: _currentWord.isEmpty ? '' : _currentWord),
                   SizedBox(height: 12.h),
-
-                  // ── Current Sentence ──
-                  _infoBox(
-                    label: 'الجملة المكونة:',
-                    value: _currentSentence.isEmpty
-                        ? '(لا يوجد)'
-                        : _currentSentence,
-                  ),
-
+                  _infoBox(label: 'الجملة المكونة:', value: _currentSentence.isEmpty ? '(لا يوجد)' : _currentSentence),
                   SizedBox(height: 20.h),
 
                   // ── Action Buttons ──
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      CustomButton(
-                        buttonText: 'كلمة جديدة',
-                        onPress: _newWord,
-                      ),
-                      CustomButton(
-                        buttonText: 'جملة جديدة',
-                        onPress: _newSentence,
-                      ),
+                      CustomButton(buttonText: 'كلمة جديدة', onPress: _newWord),
+                      CustomButton(buttonText: 'جملة جديدة', onPress: _newSentence),
                       CustomButton(
                         buttonText: _isLoadingFinalize ? '...' : 'صحح الجملة',
                         onPress: _isLoadingFinalize ? null : _correctSentence,
@@ -636,12 +554,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
     );
   }
 
-  // ── Info Box Widget ──
-  Widget _infoBox({
-    String? label,
-    required String value,
-    bool hasBorder = true,
-  }) {
+  Widget _infoBox({String? label, required String value, bool hasBorder = true}) {
     return Container(
       width: double.infinity,
       height: 56.h,
@@ -655,11 +568,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
           borderRadius: BorderRadius.circular(35.r),
         ),
         shadows: const [
-          BoxShadow(
-            color: Color(0x3F000000),
-            blurRadius: 4,
-            offset: Offset(0, 4),
-          ),
+          BoxShadow(color: Color(0x3F000000), blurRadius: 4, offset: Offset(0, 4)),
         ],
       ),
       child: Stack(
@@ -675,13 +584,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                   fontSize: 12.sp,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
-                  shadows: const [
-                    Shadow(
-                      offset: Offset(0, 4),
-                      blurRadius: 4,
-                      color: Color(0x40000000),
-                    )
-                  ],
+                  shadows: const [Shadow(offset: Offset(0, 4), blurRadius: 4, color: Color(0x40000000))],
                 ),
               ),
             ),
@@ -707,7 +610,6 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
   }
 }
 
-// ── WAV Header ──
 Uint8List addWavHeader(Uint8List pcmData, int sampleRate) {
   const int channels = 1;
   final int byteRate = sampleRate * channels * 2;

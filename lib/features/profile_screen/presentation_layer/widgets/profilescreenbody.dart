@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +10,6 @@ import 'package:graduationproject/core/style/app_assets.dart';
 import 'package:graduationproject/core/widgets/TextField_button.dart';
 import 'package:graduationproject/core/widgets/custom_back_button.dart';
 import 'package:graduationproject/features/auth/controller/auth_controller.dart';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html show FileUploadInputElement, FileReader;
 
 class ProfileScreenBody extends StatefulWidget {
   const ProfileScreenBody({super.key});
@@ -54,33 +51,24 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
   }
 
   Future<void> _pickImage() async {
-    if (kIsWeb) {
-      final input = html.FileUploadInputElement()..accept = 'image/*';
-      input.click();
-      await input.onChange.first;
-      if (input.files!.isEmpty) return;
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+    if (image == null) return;
 
-      final file = input.files!.first;
-      final reader = html.FileReader();
-      reader.readAsArrayBuffer(file);
-      await reader.onLoad.first;
+    final bytes = await image.readAsBytes();
 
-      setState(() {
-        _selectedImageBytes = reader.result as Uint8List;
-        _selectedImage = null;
-      });
-      await controller.updateUserImageBytes(_selectedImageBytes!);
-    } else {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
-      if (image == null) return;
-
-      setState(() {
+    setState(() {
+      _selectedImageBytes = bytes;
+      if (!kIsWeb) {
         _selectedImage = File(image.path);
-        _selectedImageBytes = null;
-      });
+      }
+    });
+
+    if (kIsWeb) {
+      await controller.updateUserImageBytes(bytes);
+    } else {
       await controller.updateUserImage(image.path);
     }
   }

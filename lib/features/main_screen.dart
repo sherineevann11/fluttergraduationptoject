@@ -14,7 +14,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // navigator keys لكل tab عشان كل tab يكون عنده history مستقل
   final List<GlobalKey<NavigatorState>> _navigatorKeys = [
     GlobalKey<NavigatorState>(),
     GlobalKey<NavigatorState>(),
@@ -23,7 +22,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _onItemTapped(int index) {
     if (_selectedIndex == index) {
-      // لو ضغط على نفس الـ tab يرجع للـ root
+     
       _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
     } else {
       setState(() {
@@ -36,7 +35,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // لو في صفحة داخلية يرجع لها بدل ما يخرج من الـ app
+        
         final canPop = _navigatorKeys[_selectedIndex].currentState?.canPop() ?? false;
         if (canPop) {
           _navigatorKeys[_selectedIndex].currentState?.pop();

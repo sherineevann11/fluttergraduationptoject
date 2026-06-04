@@ -1,7 +1,6 @@
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,63 +9,15 @@ import 'package:graduationproject/core/style/app_colors.dart';
 import 'package:graduationproject/core/widgets/custom_round_button.dart';
 import 'package:graduationproject/core/widgets/primary_button.dart';
 import 'package:graduationproject/features/texttosign_screen/presentation_layer/texttosignscreenview.dart';
+import 'package:graduationproject/features/voicetosign_screen/presentation_layer/widgets/recorder_%20stub.dart';
 import 'package:http/http.dart' as http;
+import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io'; // conditional import - web vs mobile
 
 // ─────────────────────────────────────────
-// Web Audio Recorder
+// Helper
 // ─────────────────────────────────────────
-
-class _WebRecorder {
-  html.MediaRecorder? _mr;
-  html.MediaStream? _stream;
-  final List<html.Blob> _chunks = [];
-
-  Future<bool> requestPermission() async {
-    try {
-      _stream = await html.window.navigator.getUserMedia(audio: true);
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  Future<void> start() async {
-    _chunks.clear();
-    _stream ??= await html.window.navigator.getUserMedia(audio: true);
-    _mr = html.MediaRecorder(_stream!);
-    _mr!.addEventListener('dataavailable', (e) {
-      final blob = (e as html.BlobEvent).data;
-      if (blob != null && blob.size > 0) _chunks.add(blob);
-    });
-    _mr!.start();
-  }
-
-  Future<Uint8List?> stop() async {
-    if (_mr == null) return null;
-    _mr!.requestData();
-    await Future.delayed(const Duration(milliseconds: 150));
-    _mr!.stop();
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (_chunks.isEmpty) return null;
-    final blob = html.Blob(_chunks, 'audio/webm');
-    final reader = html.FileReader();
-    reader.readAsArrayBuffer(blob);
-    await reader.onLoadEnd.first;
-    return reader.result as Uint8List?;
-  }
-
-  void dispose() {
-    try {
-      _mr?.stop();
-      _stream?.getTracks().forEach((t) => t.stop());
-    } catch (_) {}
-  }
-}
-
-// ─────────────────────────────────────────
-// Helper: decode base64 image string safely
-// ─────────────────────────────────────────
-
 Uint8List _decodeBase64Image(String raw) {
   final cleaned = raw.contains(',') ? raw.split(',').last : raw;
   return base64Decode(cleaned);
@@ -75,20 +26,21 @@ Uint8List _decodeBase64Image(String raw) {
 // ─────────────────────────────────────────
 // Service
 // ─────────────────────────────────────────
-
 class _ApiService {
   static const _base = 'https://backup.ema2a.website';
 
-  static Future<String> _audioToText(Uint8List bytes) async {
+  static Future<String> _audioToText(Uint8List bytes, String mimeType) async {
     final res = await http.post(
       Uri.parse('$_base/api/ArabicLanguageTranslator/audio-to-text'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'AudioData': base64Encode(bytes),
-        'MimeType': 'audio/webm',
+        'MimeType': mimeType,
       }),
     );
-    if (res.statusCode != 200) throw Exception('فشل تحويل الصوت: ${res.statusCode}');
+    if (res.statusCode != 200) {
+      throw Exception('فشل تحويل الصوت: ${res.statusCode}');
+    }
     final json = jsonDecode(res.body) as Map<String, dynamic>;
     if (json['success'] != true) throw Exception(json['errorMessage'] ?? 'خطأ');
     final text = json['data']?.toString().trim() ?? '';
@@ -102,7 +54,9 @@ class _ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'Text': text}),
     );
-    if (res.statusCode != 200) throw Exception('فشل تحويل النص: ${res.statusCode}');
+    if (res.statusCode != 200) {
+      throw Exception('فشل تحويل النص: ${res.statusCode}');
+    }
     final json = jsonDecode(res.body) as Map<String, dynamic>;
     if (json['success'] != true) throw Exception(json['errorMessage'] ?? 'خطأ');
     final raw = json['data'];
@@ -116,8 +70,11 @@ class _ApiService {
     return [];
   }
 
-  static Future<List<List<String>>> voiceToSign(Uint8List bytes) async {
-    final text = await _audioToText(bytes);
+  static Future<List<List<String>>> voiceToSign(
+    Uint8List bytes,
+    String mimeType,
+  ) async {
+    final text = await _audioToText(bytes, mimeType);
     return _textToSign(text);
   }
 }
@@ -125,7 +82,6 @@ class _ApiService {
 // ─────────────────────────────────────────
 // Screen
 // ─────────────────────────────────────────
-
 class VoiceToSignScreenBody extends StatefulWidget {
   const VoiceToSignScreenBody({super.key});
   @override
@@ -134,7 +90,12 @@ class VoiceToSignScreenBody extends StatefulWidget {
 
 class _State extends State<VoiceToSignScreenBody>
     with SingleTickerProviderStateMixin {
-  final _recorder = _WebRecorder();
+  // Web recorder (dart:html)
+  final _webRecorder = PlatformRecorder();
+
+  // Mobile recorder (record package)
+  final _mobileRecorder = AudioRecorder();
+  String? _mobilePath;
 
   bool _isRecording = false;
   bool _isLoading = false;
@@ -149,45 +110,88 @@ class _State extends State<VoiceToSignScreenBody>
   void initState() {
     super.initState();
     _anim = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600))
-      ..repeat(reverse: true);
-    _scale = Tween(begin: 1.0, end: 1.12)
-        .animate(CurvedAnimation(parent: _anim, curve: Curves.easeInOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..repeat(reverse: true);
+    _scale = Tween(
+      begin: 1.0,
+      end: 1.12,
+    ).animate(CurvedAnimation(parent: _anim, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
     _anim.dispose();
-    _recorder.dispose();
+    _webRecorder.dispose();
+    _mobileRecorder.dispose();
     super.dispose();
   }
 
   Future<void> _onMicTap() async {
     if (_isLoading) return;
     if (_isRecording) {
-      final bytes = await _recorder.stop();
-      setState(() => _isRecording = false);
-      if (bytes == null || bytes.isEmpty) {
-        setState(() => _error = 'لم يُسجَّل صوت، حاول مرة أخرى');
-        return;
-      }
-      await _convert(bytes);
+      await _stopRecording();
     } else {
-      final ok = await _recorder.requestPermission();
+      await _startRecording();
+    }
+  }
+
+  Future<void> _startRecording() async {
+    if (kIsWeb) {
+      // ── Web ──
+      final ok = await _webRecorder.requestPermission();
       if (!ok) {
         setState(() => _error = 'اسمح للمتصفح باستخدام الميكروفون');
         return;
       }
-      await _recorder.start();
-      setState(() {
-        _isRecording = true;
-        _error = null;
-        _signImages = [];
-      });
+      await _webRecorder.start();
+    } else {
+      // ── Mobile ──
+      final hasPermission = await _mobileRecorder.hasPermission();
+      if (!hasPermission) {
+        setState(() => _error = 'اسمح للتطبيق باستخدام الميكروفون');
+        return;
+      }
+      final dir = await getTemporaryDirectory();
+      _mobilePath =
+          '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      await _mobileRecorder.start(
+        const RecordConfig(encoder: AudioEncoder.aacLc),
+        path: _mobilePath!,
+      );
+    }
+
+    setState(() {
+      _isRecording = true;
+      _error = null;
+      _signImages = [];
+    });
+  }
+
+  Future<void> _stopRecording() async {
+    setState(() => _isRecording = false);
+
+    if (kIsWeb) {
+      // ── Web ──
+      final bytes = await _webRecorder.stop();
+      if (bytes == null || bytes.isEmpty) {
+        setState(() => _error = 'لم يُسجَّل صوت، حاول مرة أخرى');
+        return;
+      }
+      await _convert(bytes, 'audio/webm');
+    } else {
+      // ── Mobile ──
+      final path = await _mobileRecorder.stop();
+      if (path == null) {
+        setState(() => _error = 'لم يُسجَّل صوت، حاول مرة أخرى');
+        return;
+      }
+      final bytes = await File(path).readAsBytes();
+      await _convert(bytes, 'audio/m4a');
     }
   }
 
-  Future<void> _convert(Uint8List bytes) async {
+  Future<void> _convert(Uint8List bytes, String mimeType) async {
     setState(() {
       _isLoading = true;
       _error = null;
@@ -195,7 +199,7 @@ class _State extends State<VoiceToSignScreenBody>
       _loadingStep = 'جاري التعرف على الكلام...';
     });
     try {
-      final images = await _ApiService.voiceToSign(bytes);
+      final images = await _ApiService.voiceToSign(bytes, mimeType);
       setState(() => _signImages = images);
       if (images.isEmpty) setState(() => _error = 'لا توجد إشارات لهذا الكلام');
     } catch (e) {
@@ -229,7 +233,6 @@ class _State extends State<VoiceToSignScreenBody>
       child: SafeArea(
         child: Column(
           children: [
-            // ── Title ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Text(
@@ -245,7 +248,6 @@ class _State extends State<VoiceToSignScreenBody>
 
             SizedBox(height: 10.h),
 
-            // ── Mic Section ──
             GestureDetector(
               onTap: _onMicTap,
               child: SizedBox(
@@ -254,14 +256,8 @@ class _State extends State<VoiceToSignScreenBody>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Positioned(
-                      left: 20.w,
-                      child: _buildWaves(mirrored: false),
-                    ),
-                    Positioned(
-                      right: 20.w,
-                      child: _buildWaves(mirrored: true),
-                    ),
+                    Positioned(left: 20.w, child: _buildWaves(mirrored: false)),
+                    Positioned(right: 20.w, child: _buildWaves(mirrored: true)),
                     Container(
                       width: 150.w,
                       height: 150.w,
@@ -285,8 +281,11 @@ class _State extends State<VoiceToSignScreenBody>
                         ),
                         child: Center(
                           child: _isRecording
-                              ? Icon(Icons.stop_rounded,
-                                  color: Colors.white, size: 50.w)
+                              ? Icon(
+                                  Icons.stop_rounded,
+                                  color: Colors.white,
+                                  size: 50.w,
+                                )
                               : SvgPicture.asset(
                                   AppAssets.MicVoice,
                                   width: 52.w,
@@ -305,24 +304,31 @@ class _State extends State<VoiceToSignScreenBody>
 
             SizedBox(height: 8.h),
 
-            // ── Status ──
             if (_isRecording)
-              Text('🔴 جاري التسجيل... اضغط للإيقاف',
-                  style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w500))
+              Text(
+                '🔴 جاري التسجيل... اضغط للإيقاف',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              )
             else if (_isLoading)
-              Text(_loadingStep,
-                  style:
-                      TextStyle(color: const Color(0xFF2BBBFA), fontSize: 13.sp))
+              Text(
+                _loadingStep,
+                style: TextStyle(
+                  color: const Color(0xFF2BBBFA),
+                  fontSize: 13.sp,
+                ),
+              )
             else
-              Text('اضغط للتسجيل',
-                  style: TextStyle(color: Colors.grey, fontSize: 13.sp)),
+              Text(
+                'اضغط للتسجيل',
+                style: TextStyle(color: Colors.grey, fontSize: 13.sp),
+              ),
 
             SizedBox(height: 14.h),
 
-            // ── Buttons Row ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
@@ -341,10 +347,12 @@ class _State extends State<VoiceToSignScreenBody>
                               ),
                             ),
                       textColor: Colors.white,
-                      buttonColor:
-                          _isRecording ? Colors.red : AppColors.primaryColor,
-                      borderColor:
-                          _isRecording ? Colors.red : AppColors.primaryColor,
+                      buttonColor: _isRecording
+                          ? Colors.red
+                          : AppColors.primaryColor,
+                      borderColor: _isRecording
+                          ? Colors.red
+                          : AppColors.primaryColor,
                       height: 48.h,
                       onPress: _isLoading ? () {} : _onMicTap,
                     ),
@@ -353,19 +361,21 @@ class _State extends State<VoiceToSignScreenBody>
                   Expanded(
                     child: CustomRoundButton(
                       buttonText: 'تحويل النص',
-                      icon: Icon(Icons.spellcheck,
-                          color: Colors.white, size: 18.w),
+                      icon: Icon(
+                        Icons.spellcheck,
+                        color: Colors.white,
+                        size: 18.w,
+                      ),
                       textColor: Colors.white,
                       buttonColor: const Color(0xFF276C8A),
                       borderColor: const Color(0xFF44BCF0),
                       height: 48.h,
-                      onPress: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const TextToSignScreenView()),
-                        );
-                      },
+                      onPress: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const TextToSignScreenView(),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -374,132 +384,153 @@ class _State extends State<VoiceToSignScreenBody>
 
             SizedBox(height: 24.h),
 
-            // ── Results ──
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(children: [
-                  if (_isLoading)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      child: Text(_loadingStep,
+                child: Column(
+                  children: [
+                    if (_isLoading)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        child: Text(
+                          _loadingStep,
                           style: TextStyle(
-                              color: const Color(0xFF2BBBFA), fontSize: 14.sp)),
-                    ),
-
-                  if (_error != null)
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.red.shade300),
+                            color: const Color(0xFF2BBBFA),
+                            fontSize: 14.sp,
+                          ),
+                        ),
                       ),
-                      child: Text(_error!,
-                          style: const TextStyle(color: Colors.red),
-                          textAlign: TextAlign.center),
-                    ),
 
-                  if (_signImages.isNotEmpty)
-                    Column(
-                      children: _signImages.asMap().entries.map((e) {
-                        final idx = e.key;
-                        final imgs = e.value;
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 16.h),
-                          child: Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12.w, vertical: 10.h),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: const Color(0xFF5DBBFF), width: 1),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.25),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 4),
+                    if (_error != null)
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red.shade300),
+                        ),
+                        child: Text(
+                          _error!,
+                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                    if (_signImages.isNotEmpty)
+                      Column(
+                        children: _signImages.asMap().entries.map((e) {
+                          final idx = e.key;
+                          final imgs = e.value;
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16.h),
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 10.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFF5DBBFF),
+                                  width: 1,
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Icon(Icons.spellcheck,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.25),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Icon(
+                                        Icons.spellcheck,
                                         color: const Color(0xFF30BBF9),
-                                        size: 18.w),
-                                    SizedBox(width: 4.w),
-                                    Text('كلمة ${idx + 1}',
+                                        size: 18.w,
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        'كلمة ${idx + 1}',
                                         style: TextStyle(
-                                            color: const Color(0xFF30BBF9),
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w600)),
-                                  ],
-                                ),
-                                SizedBox(height: 10.h),
-                                Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: SizedBox(
-                                    height: 88.h,
-                                    child: ListView.separated(
-                                      scrollDirection: Axis.horizontal,
-                                      reverse: true,
-                                      itemCount: imgs.length,
-                                      separatorBuilder: (_, __) =>
-                                          SizedBox(width: 12.w),
-                                      itemBuilder: (_, i) => Container(
-                                        width: 80.w,
-                                        height: 80.h,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8.w, vertical: 4.h),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF98DCFA),
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black
-                                                  .withOpacity(0.25),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
+                                          color: const Color(0xFF30BBF9),
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w600,
                                         ),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          child: _buildSignImage(imgs[i]),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: SizedBox(
+                                      height: 88.h,
+                                      child: ListView.separated(
+                                        scrollDirection: Axis.horizontal,
+                                        reverse: true,
+                                        itemCount: imgs.length,
+                                        separatorBuilder: (_, __) =>
+                                            SizedBox(width: 12.w),
+                                        itemBuilder: (_, i) => Container(
+                                          width: 80.w,
+                                          height: 80.h,
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 8.w,
+                                            vertical: 4.h,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF98DCFA),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(
+                                                  0.25,
+                                                ),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            child: _buildSignImage(imgs[i]),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        }).toList(),
+                      ),
+
+                    SizedBox(height: 25.h),
+
+                    PrimaryButton(
+                      buttonText: 'الرجوع',
+                      buttonColor: AppColors.primaryColor,
+                      width: 272.w,
+                      height: 65.h,
+                      onPress: () => Navigator.pop(context),
                     ),
 
-                  SizedBox(height: 25.h),
-
-                  PrimaryButton(
-                    buttonText: 'الرجوع',
-                    buttonColor: AppColors.primaryColor,
-                    width: 272.w,
-                    height: 65.h,
-                    onPress: () => Navigator.pop(context),
-                  ),
-
-                  SizedBox(height: 16.h),
-                ]),
+                    SizedBox(height: 16.h),
+                  ],
+                ),
               ),
             ),
           ],
@@ -529,7 +560,6 @@ class _State extends State<VoiceToSignScreenBody>
         },
       );
     });
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,

@@ -375,7 +375,7 @@ class _AccountBodyState extends State<AccountBody> {
         Switch(
           value: false,
           onChanged: (value) {},
-          activeColor: const Color(0xFF30BBF9),
+          activeThumbColor: const Color(0xFF30BBF9),
         ),
       ],
     );

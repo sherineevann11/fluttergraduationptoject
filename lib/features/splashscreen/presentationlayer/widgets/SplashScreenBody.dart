@@ -96,7 +96,7 @@ class SplashScreenBody extends StatelessWidget {
               children: [
                 /// Log in Button
                 LoginButton(
-                  buttonText: 'Log in',
+                  buttonText: 'تسجيل الدخول',
                   width: 304.w,
                   height: 76.h,
                   onPress: () {
@@ -113,7 +113,7 @@ class SplashScreenBody extends StatelessWidget {
 
                 /// Sign Up Button
                 PrimaryOutlinedButton(
-                  buttonText: 'Sign Up',
+                  buttonText: 'إنشاء حساب',
                   width: 304.w,
                   height: 76.h,
                   textColor: AppColors.primaryColor,
