@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:camera/camera.dart';
@@ -14,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:graduationproject/core/widgets/sqaure_button.dart';
+import 'package:get_storage/get_storage.dart';
 
 List<CameraDescription> globalCameras = [];
 
@@ -39,7 +41,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
   final String _serverUrl = "https://backup.ema2a.website/signHub";
   final String _apiBaseUrl = "https://backup.ema2a.website";
 
-  String _detectionText = "جاري الاتصال...";
+  String _detectionText = "جارٍ الاتصال...";
   String _currentWord = "";
   String _currentSentence = "";
   String _lastPrediction = "";
@@ -75,7 +77,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         debugPrint("==== Server sent: '$message' ====");
         if (!mounted) return;
         setState(() => _detectionText = message.isEmpty
-            ? 'لم يتم اكتشاف إشارة (حاول تعديل اليد)'
+            ? 'لم يُكتشف أي إشارة (حاول تعديل وضع اليد)'
             : message);
         if (arabicLabels.contains(message)) {
           final int now = DateTime.now().millisecondsSinceEpoch;
@@ -96,7 +98,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       setState(() {
         _isConnected = false;
         _isReconnecting = true;
-        _detectionText = "جاري إعادة الاتصال...";
+        _detectionText = "جارٍ إعادة الاتصال...";
       });
       _frameProcessingTimer?.cancel();
     });
@@ -108,7 +110,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       setState(() {
         _isConnected = true;
         _isReconnecting = false;
-        _detectionText = _isStreaming ? "الكاميرا تعمل، يتم اكتشاف الحروف..." : "تم الاتصال. شغلي الكاميرا";
+        _detectionText = _isStreaming ? "الكاميرا تعمل، جارٍ اكتشاف الحروف..." : "تم الاتصال. شغِّل الكاميرا";
       });
       if (_isStreaming) _startFrameCapture();
     });
@@ -135,7 +137,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       setState(() {
         _isConnected = true;
         _isReconnecting = false;
-        _detectionText = "تم الاتصال. شغلي الكاميرا";
+        _detectionText = "تم الاتصال. شغِّل الكاميرا";
       });
       debugPrint("SignalR connected ✅");
     } catch (e) {
@@ -143,7 +145,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       if (!mounted) return;
       setState(() {
         _isConnected = false;
-        _detectionText = "فشل الاتصال، جاري المحاولة...";
+        _detectionText = "فشل الاتصال، جارٍ المحاولة...";
       });
       _scheduleManualReconnect();
     }
@@ -152,8 +154,8 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
   void _scheduleManualReconnect() {
     if (_reconnectAttempts >= _maxReconnectAttempts) {
       if (mounted) {
-        setState(() => _detectionText = "تعذر الاتصال بالسيرفر.");
-        _showSnackBar("تعذر الاتصال بعد $_maxReconnectAttempts محاولات", Colors.red);
+        setState(() => _detectionText = "تعذّر الاتصال بالخادم.");
+        _showSnackBar("تعذّر الاتصال بعد $_maxReconnectAttempts محاولات", Colors.red);
       }
       return;
     }
@@ -166,42 +168,57 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
 
   Future<void> _startCamera() async {
     if (!_isConnected) {
-      _showSnackBar("غير متصل بالسيرفر. انتظر...", Colors.orange);
+      _showSnackBar("غير متصل بالخادم. انتظر...", Colors.orange);
       return;
     }
-    if (globalCameras.isEmpty) {
+
+    if (kIsWeb || globalCameras.isEmpty) {
       try {
         globalCameras = await availableCameras();
+        debugPrint("📷 Found ${globalCameras.length} cameras: ${globalCameras.map((c) => c.name).toList()}");
       } catch (e) {
-        _showSnackBar("خطأ في تحميل الكاميرات", Colors.red);
+        debugPrint("❌ availableCameras error: $e");
+        _showSnackBar("خطأ في تحميل الكاميرات: $e", Colors.red);
         return;
       }
     }
-    if (globalCameras.isEmpty) return;
 
-    final CameraDescription frontCamera = globalCameras.firstWhere(
+    if (globalCameras.isEmpty) {
+      _showSnackBar("لا توجد كاميرا متاحة على هذا الجهاز", Colors.red);
+      return;
+    }
+
+    final CameraDescription selectedCamera = globalCameras.firstWhere(
       (cam) => cam.lensDirection == CameraLensDirection.front,
       orElse: () => globalCameras.first,
     );
+    debugPrint("📷 Using camera: ${selectedCamera.name} (${selectedCamera.lensDirection})");
+
+    await _cameraController?.dispose();
+    _cameraController = null;
 
     _cameraController = CameraController(
-      frontCamera,
+      selectedCamera,
       ResolutionPreset.low,
       enableAudio: false,
-      imageFormatGroup: ImageFormatGroup.jpeg,
+      imageFormatGroup: kIsWeb ? ImageFormatGroup.jpeg : ImageFormatGroup.jpeg,
     );
 
     try {
-      await _cameraController?.initialize();
+      await _cameraController!.initialize();
+      debugPrint("✅ Camera initialized");
     } catch (e) {
-      _showSnackBar("فشل تشغيل الكاميرا", Colors.red);
+      debugPrint("❌ Camera init error: $e");
+      _showSnackBar("فشل تشغيل الكاميرا: تأكد من إذن الكاميرا في المتصفح", Colors.red);
+      _cameraController?.dispose();
+      _cameraController = null;
       return;
     }
 
     if (!mounted) return;
     setState(() {
       _isStreaming = true;
-      _detectionText = "الكاميرا تعمل، يتم اكتشاف الحروف...";
+      _detectionText = "الكاميرا تعمل، جارٍ اكتشاف الحروف...";
     });
     _startFrameCapture();
   }
@@ -235,9 +252,19 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
           });
         } catch (e) {
           debugPrint("❌ Error capturing or sending frame: $e");
-          if (e.toString().contains("Connection") || e.toString().contains("closed")) {
+          final String errStr = e.toString();
+          if (errStr.contains("Connection") || errStr.contains("closed")) {
             _frameProcessingTimer?.cancel();
-            if (mounted) setState(() => _detectionText = "انقطع الاتصال، جاري إعادة الاتصال...");
+            if (mounted) setState(() => _detectionText = "انقطع الاتصال، جارٍ إعادة الاتصال...");
+          } else if (errStr.contains("camera") || errStr.contains("Camera") || errStr.contains("NotAllowed")) {
+            _frameProcessingTimer?.cancel();
+            if (mounted) {
+              setState(() {
+                _isStreaming = false;
+                _detectionText = "تم رفض إذن الكاميرا";
+              });
+              _showSnackBar("تأكد من منح إذن الكاميرا للمتصفح", Colors.red);
+            }
           }
         } finally {
           _isProcessingFrame = false;
@@ -265,7 +292,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       setState(() {
         _isStreaming = false;
         _isProcessingFrame = false;
-        _detectionText = _isConnected ? "تم الاتصال. شغلي الكاميرا" : "غير متصل";
+        _detectionText = _isConnected ? "تم الاتصال. شغِّل الكاميرا" : "غير متصل";
       });
     }
   }
@@ -290,6 +317,13 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
     });
   }
 
+  String? _getToken() {
+    final box = GetStorage();
+    final token = box.read<String>('accessToken');
+    debugPrint("🔑 Token found: ${token != null && token.isNotEmpty ? 'yes' : 'NO TOKEN'}");
+    return token?.isNotEmpty == true ? token : null;
+  }
+
   Future<void> _correctSentence() async {
     final String textToSend = _currentSentence.isNotEmpty ? _currentSentence : _currentWord;
     if (textToSend.isEmpty) {
@@ -298,11 +332,19 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
     }
     setState(() => _isLoadingFinalize = true);
     try {
+      final String? token = _getToken();
       final response = await http.post(
         Uri.parse("$_apiBaseUrl/api/signlanguagetranslator/finalize-sentence"),
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        },
         body: jsonEncode({"sentence": textToSend}),
       ).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 401) {
+        _showSnackBar("انتهت الجلسة، يرجى تسجيل الدخول مجدداً", Colors.red);
+        return;
+      }
       final result = jsonDecode(response.body);
       if (result['success'] == true && result['data'] != null) {
         setState(() => _currentSentence = result['data']);
@@ -327,30 +369,46 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
     }
     setState(() => _isLoadingAudio = true);
     try {
+      final String? token = _getToken();
+      debugPrint("🔑 Token: ${token != null ? token.substring(0, 20) + '...' : 'NOT FOUND ❌'}");
       final response = await http.post(
         Uri.parse("$_apiBaseUrl/api/signlanguagetranslator/generate-audio"),
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        },
         body: jsonEncode({"text": textToSend}),
       ).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 401) {
+        _showSnackBar("انتهت الجلسة، يرجى تسجيل الدخول مجدداً", Colors.red);
+        return;
+      }
       final result = jsonDecode(response.body);
       if (result['success'] == true) {
         final String base64Audio = result['data']['audioData'];
         final int sampleRate = result['data']['sampleRate'];
         final Uint8List pcmBytes = base64Decode(base64Audio);
         final Uint8List wavBytes = addWavHeader(pcmBytes, sampleRate);
-        final Directory tempDir = await getTemporaryDirectory();
-        final String fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.wav';
-        final File tempFile = File('${tempDir.path}/$fileName');
-        await tempFile.writeAsBytes(wavBytes);
-        await _audioPlayer.play(DeviceFileSource(tempFile.path));
-        _showSnackBar("جاري تشغيل الصوت", Colors.green);
+
+        if (kIsWeb) {
+          await _audioPlayer.play(BytesSource(wavBytes));
+        } else {
+          final Directory tempDir = await getTemporaryDirectory();
+          final String fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.wav';
+          final File tempFile = File('${tempDir.path}/$fileName');
+          await tempFile.writeAsBytes(wavBytes);
+          await _audioPlayer.play(DeviceFileSource(tempFile.path));
+        }
+
+        _showSnackBar("جارٍ تشغيل الصوت", Colors.green);
       } else {
         _showSnackBar(result['errorMessage'] ?? "فشل إنشاء الصوت", Colors.red);
       }
     } on TimeoutException {
       _showSnackBar("انتهت مهلة الطلب", Colors.red);
     } catch (e) {
-      _showSnackBar("خطأ في الصوت", Colors.red);
+      debugPrint("❌ Audio error: $e");
+      _showSnackBar("خطأ في الصوت: ${e.toString()}", Colors.red);
     } finally {
       setState(() => _isLoadingAudio = false);
     }
@@ -399,7 +457,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ── Camera Preview ──
+            // ── معاينة الكاميرا ──
             Stack(
               children: [
                 Container(
@@ -438,7 +496,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                 children: [
                   SizedBox(height: 8.h),
 
-                  // ── Connection Status ──
+                  // ── حالة الاتصال ──
                   Row(
                     children: [
                       Container(
@@ -454,7 +512,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                       SizedBox(width: 6.w),
                       Text(
                         _isReconnecting
-                            ? 'جاري إعادة الاتصال...'
+                            ? 'جارٍ إعادة الاتصال...'
                             : (_isConnected ? 'متصل' : 'غير متصل'),
                         style: TextStyle(
                           fontSize: 11.sp,
@@ -487,12 +545,12 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
 
                   SizedBox(height: 8.h),
 
-                  // ── Camera Button ──
+                  // ── زر الكاميرا ──
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomButton(
-                        buttonText: _isStreaming ? 'أوقف الكاميرا' : 'شغل الكاميرا',
+                        buttonText: _isStreaming ? 'أوقف الكاميرا' : 'شغِّل الكاميرا',
                         width: 140.w,
                         height: 39.h,
                         borderRadius: 19.r,
@@ -504,7 +562,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                           child: Padding(
                             padding: EdgeInsets.only(right: 8.w),
                             child: Text(
-                              'الكاميرا قيد التشغيل، يتم اكتشاف الحروف...',
+                              'الكاميرا قيد التشغيل، جارٍ اكتشاف الحروف...',
                               style: TextStyle(
                                 color: const Color(0xFF5DBBFF),
                                 fontSize: 12.sp,
@@ -522,19 +580,19 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
 
                   _infoBox(value: _detectionText, hasBorder: false),
                   SizedBox(height: 12.h),
-                  _infoBox(label: 'الحرف / الكلمة المكونة:', value: _currentWord.isEmpty ? '' : _currentWord),
+                  _infoBox(label: 'الحرف / الكلمة المكوَّنة:', value: _currentWord.isEmpty ? '' : _currentWord),
                   SizedBox(height: 12.h),
-                  _infoBox(label: 'الجملة المكونة:', value: _currentSentence.isEmpty ? '(لا يوجد)' : _currentSentence),
+                  _infoBox(label: 'الجملة المكوَّنة:', value: _currentSentence.isEmpty ? '(لا يوجد)' : _currentSentence),
                   SizedBox(height: 20.h),
 
-                  // ── Action Buttons ──
+                  // ── أزرار الإجراءات ──
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomButton(buttonText: 'كلمة جديدة', onPress: _newWord),
                       CustomButton(buttonText: 'جملة جديدة', onPress: _newSentence),
                       CustomButton(
-                        buttonText: _isLoadingFinalize ? '...' : 'صحح الجملة',
+                        buttonText: _isLoadingFinalize ? '...' : 'صحِّح الجملة',
                         onPress: _isLoadingFinalize ? null : _correctSentence,
                       ),
                       CustomButton(

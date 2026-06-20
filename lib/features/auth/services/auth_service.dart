@@ -9,8 +9,8 @@ class AuthService {
     _dio = dio.Dio(
       dio.BaseOptions(
         baseUrl: "https://backup.ema2a.website/api",
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 60),
         validateStatus: (status) => status != null && status < 500,
       ),
     );

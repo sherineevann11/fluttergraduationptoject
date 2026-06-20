@@ -35,24 +35,22 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
   }
 
   void _onRegisterPressed() {
-   
     if (fullNameController.text.isEmpty ||
         phoneController.text.isEmpty ||
         userNameController.text.isEmpty ||
         emailController.text.isEmpty ||
         passwordController.text.isEmpty ||
         confirmPasswordController.text.isEmpty) {
-      Get.snackbar('خطأ', 'ادخل كل البيانات',
+      Get.snackbar('خطأ', 'أدخل جميع البيانات',
           backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
-    
     if (!RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{6,}$')
         .hasMatch(passwordController.text)) {
       Get.snackbar(
         'خطأ',
-        'كلمة المرور لازم تحتوي على:\n• حرف كبير\n• حرف صغير\n• رقم\n• رمز خاص مثل: Sherine@123',
+        'كلمة المرور يجب أن تحتوي على:\n• حرف كبير\n• حرف صغير\n• رقم\n• رمز خاص مثل: Sherine@123',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 4),
@@ -60,14 +58,12 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
       return;
     }
 
-    
     if (passwordController.text != confirmPasswordController.text) {
       Get.snackbar('خطأ', 'كلمتا المرور غير متطابقتين',
           backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
-   
     controller.register(
       email: emailController.text.trim(),
       fullName: fullNameController.text.trim(),
@@ -93,14 +89,14 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
           children: [
             CustomTextField(
               label: 'الاسم',
-              hintText: 'ادخل اسمك',
+              hintText: 'أدخل اسمك',
               controller: fullNameController,
             ),
             SizedBox(height: 16.h),
 
             CustomTextField(
-              label: 'رقم الموبايل',
-              hintText: 'ادخل رقم الموبايل',
+              label: 'رقم الهاتف',
+              hintText: 'أدخل رقم هاتفك',
               controller: phoneController,
               keyboardType: TextInputType.phone,
             ),
@@ -108,14 +104,14 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
 
             CustomTextField(
               label: 'اسم المستخدم',
-              hintText: 'ادخل اسم المستخدم',
+              hintText: 'أدخل اسم المستخدم',
               controller: userNameController,
             ),
             SizedBox(height: 16.h),
 
             CustomTextField(
               label: 'البريد الإلكتروني',
-              hintText: 'ادخل البريد الإلكتروني',
+              hintText: 'أدخل بريدك الإلكتروني',
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
             ),
@@ -131,7 +127,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
 
             CustomTextField(
               label: 'تأكيد كلمة المرور',
-              hintText: 'ادخل كلمة المرور مرة أخرى',
+              hintText: 'أدخل كلمة المرور مرة أخرى',
               controller: confirmPasswordController,
               obscureText: true,
             ),
@@ -140,7 +136,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
             /// زر التسجيل
             Obx(() => PrimaryButton(
                   buttonText: controller.isLoading.value
-                      ? 'جاري التحميل...'
+                      ? 'جارٍ التحميل...'
                       : 'إنشاء حساب',
                   icon: SvgPicture.asset(
                     AppAssets.iconarrow,
@@ -154,7 +150,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
 
             SizedBox(height: 16.h),
 
-            /// تسجيل دخول
+            /// تسجيل الدخول
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -165,7 +161,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Text(
-                    'تسجيل دخول',
+                    'تسجيل الدخول',
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: Colors.orange,

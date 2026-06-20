@@ -188,26 +188,26 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
               children: [
                 CustomTextField(
                   label: 'الاسم',
-                  hintText: 'ادخل اسمك',
+                  hintText: 'أدخل اسمك',
                   controller: _nameController,
                 ),
                 SizedBox(height: 20.h),
                 CustomTextField(
                   label: 'اسم المستخدم',
-                  hintText: 'ادخل اسم المستخدم',
+                  hintText: 'أدخل اسم المستخدم',
                   controller: _usernameController,
                 ),
                 SizedBox(height: 20.h),
                 CustomTextField(
                   label: 'البريد الإلكتروني',
-                  hintText: 'ادخل البريد الإلكتروني',
+                  hintText: 'أدخل بريدك الإلكتروني',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 SizedBox(height: 20.h),
                 CustomTextField(
-                  label: 'رقم الموبايل',
-                  hintText: 'ادخل رقم الموبايل',
+                  label: 'رقم الهاتف',
+                  hintText: 'أدخل رقم هاتفك',
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                 ),

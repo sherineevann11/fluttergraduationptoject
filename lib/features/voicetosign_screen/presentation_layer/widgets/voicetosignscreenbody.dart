@@ -13,19 +13,13 @@ import 'package:graduationproject/features/voicetosign_screen/presentation_layer
 import 'package:http/http.dart' as http;
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io'; // conditional import - web vs mobile
+import 'dart:io';
 
-// ─────────────────────────────────────────
-// Helper
-// ─────────────────────────────────────────
 Uint8List _decodeBase64Image(String raw) {
   final cleaned = raw.contains(',') ? raw.split(',').last : raw;
   return base64Decode(cleaned);
 }
 
-// ─────────────────────────────────────────
-// Service
-// ─────────────────────────────────────────
 class _ApiService {
   static const _base = 'https://backup.ema2a.website';
 
@@ -42,7 +36,7 @@ class _ApiService {
       throw Exception('فشل تحويل الصوت: ${res.statusCode}');
     }
     final json = jsonDecode(res.body) as Map<String, dynamic>;
-    if (json['success'] != true) throw Exception(json['errorMessage'] ?? 'خطأ');
+    if (json['success'] != true) throw Exception(json['errorMessage'] ?? 'خطأ غير معروف');
     final text = json['data']?.toString().trim() ?? '';
     if (text.isEmpty) throw Exception('لم يُتعرَّف على كلام في التسجيل');
     return text;
@@ -58,7 +52,7 @@ class _ApiService {
       throw Exception('فشل تحويل النص: ${res.statusCode}');
     }
     final json = jsonDecode(res.body) as Map<String, dynamic>;
-    if (json['success'] != true) throw Exception(json['errorMessage'] ?? 'خطأ');
+    if (json['success'] != true) throw Exception(json['errorMessage'] ?? 'خطأ غير معروف');
     final raw = json['data'];
     if (raw == null) return [];
     if (raw is List) {
@@ -79,9 +73,6 @@ class _ApiService {
   }
 }
 
-// ─────────────────────────────────────────
-// Screen
-// ─────────────────────────────────────────
 class VoiceToSignScreenBody extends StatefulWidget {
   const VoiceToSignScreenBody({super.key});
   @override
@@ -90,10 +81,7 @@ class VoiceToSignScreenBody extends StatefulWidget {
 
 class _State extends State<VoiceToSignScreenBody>
     with SingleTickerProviderStateMixin {
-  // Web recorder (dart:html)
   final _webRecorder = PlatformRecorder();
-
-  // Mobile recorder (record package)
   final _mobileRecorder = AudioRecorder();
   String? _mobilePath;
 
@@ -138,7 +126,6 @@ class _State extends State<VoiceToSignScreenBody>
 
   Future<void> _startRecording() async {
     if (kIsWeb) {
-      // ── Web ──
       final ok = await _webRecorder.requestPermission();
       if (!ok) {
         setState(() => _error = 'اسمح للمتصفح باستخدام الميكروفون');
@@ -146,7 +133,6 @@ class _State extends State<VoiceToSignScreenBody>
       }
       await _webRecorder.start();
     } else {
-      // ── Mobile ──
       final hasPermission = await _mobileRecorder.hasPermission();
       if (!hasPermission) {
         setState(() => _error = 'اسمح للتطبيق باستخدام الميكروفون');
@@ -172,7 +158,6 @@ class _State extends State<VoiceToSignScreenBody>
     setState(() => _isRecording = false);
 
     if (kIsWeb) {
-      // ── Web ──
       final bytes = await _webRecorder.stop();
       if (bytes == null || bytes.isEmpty) {
         setState(() => _error = 'لم يُسجَّل صوت، حاول مرة أخرى');
@@ -180,7 +165,6 @@ class _State extends State<VoiceToSignScreenBody>
       }
       await _convert(bytes, 'audio/webm');
     } else {
-      // ── Mobile ──
       final path = await _mobileRecorder.stop();
       if (path == null) {
         setState(() => _error = 'لم يُسجَّل صوت، حاول مرة أخرى');
@@ -196,7 +180,7 @@ class _State extends State<VoiceToSignScreenBody>
       _isLoading = true;
       _error = null;
       _signImages = [];
-      _loadingStep = 'جاري التعرف على الكلام...';
+      _loadingStep = 'جارٍ التعرف على الكلام...';
     });
     try {
       final images = await _ApiService.voiceToSign(bytes, mimeType);
@@ -233,10 +217,11 @@ class _State extends State<VoiceToSignScreenBody>
       child: SafeArea(
         child: Column(
           children: [
+            // العنوان
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Text(
-                'تحويل الصوت الى لغة الاشارة',
+                'الصوت إلى لغة الإشارة',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.primaryColor,
@@ -306,7 +291,7 @@ class _State extends State<VoiceToSignScreenBody>
 
             if (_isRecording)
               Text(
-                '🔴 جاري التسجيل... اضغط للإيقاف',
+                '🔴 جارٍ التسجيل... اضغط للإيقاف',
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 13.sp,
@@ -488,23 +473,17 @@ class _State extends State<VoiceToSignScreenBody>
                                           ),
                                           decoration: BoxDecoration(
                                             color: const Color(0xFF98DCFA),
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
+                                            borderRadius: BorderRadius.circular(16),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withOpacity(
-                                                  0.25,
-                                                ),
+                                                color: Colors.black.withOpacity(0.25),
                                                 blurRadius: 4,
                                                 offset: const Offset(0, 4),
                                               ),
                                             ],
                                           ),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
+                                            borderRadius: BorderRadius.circular(12),
                                             child: _buildSignImage(imgs[i]),
                                           ),
                                         ),

@@ -27,8 +27,6 @@ class _AccountBodyState extends State<AccountBody> {
   @override
   void initState() {
     super.initState();
-
-    /// الحل للمشكلة
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProfile();
     });
@@ -86,8 +84,8 @@ class _AccountBodyState extends State<AccountBody> {
 
               CustomTextField(
                 label: 'كلمة المرور القديمة',
-                hintText: 'ادخل كلمة المرور',
-               isPassword:true,
+                hintText: 'أدخل كلمة المرور',
+                isPassword: true,
                 controller: oldPasswordController,
               ),
 
@@ -95,8 +93,8 @@ class _AccountBodyState extends State<AccountBody> {
 
               CustomTextField(
                 label: 'كلمة المرور الجديدة',
-                hintText: 'ادخل كلمة المرور',
-                isPassword:true,
+                hintText: 'أدخل كلمة المرور',
+                isPassword: true,
                 controller: newPasswordController,
               ),
 
@@ -104,8 +102,8 @@ class _AccountBodyState extends State<AccountBody> {
 
               CustomTextField(
                 label: 'تأكيد كلمة المرور',
-                hintText: 'تأكيد كلمة المرور',
-                isPassword:true,
+                hintText: 'أكِّد كلمة المرور',
+                isPassword: true,
                 controller: confirmPasswordController,
               ),
 
@@ -116,26 +114,20 @@ class _AccountBodyState extends State<AccountBody> {
                 height: 55.h,
                 child: ElevatedButton(
                   onPressed: () {
-
                     if (newPasswordController.text !=
                         confirmPasswordController.text) {
-
                       Get.snackbar(
                         'خطأ',
                         'كلمتا المرور غير متطابقتين',
                         backgroundColor: Colors.red,
                         colorText: Colors.white,
                       );
-
                     } else {
-
                       _authController.changePasswordProfile(
                         currentPassword: oldPasswordController.text,
                         newPassword: newPasswordController.text,
                       );
-
                     }
-
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF30BBF9),
@@ -166,9 +158,7 @@ class _AccountBodyState extends State<AccountBody> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       body: Stack(
         children: [
 
@@ -199,7 +189,7 @@ class _AccountBodyState extends State<AccountBody> {
             right: 20.w,
             child: Center(
               child: Text(
-              'مرحباً ',
+                'مرحباً',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 35.sp,
@@ -278,16 +268,13 @@ class _AccountBodyState extends State<AccountBody> {
               icon: AppAssets.profileIcon,
               title: 'الملف الشخصي',
               onTap: () async {
-
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const ProfileScreenView(),
                   ),
                 );
-
                 _loadProfile();
-
               },
             ),
           ),

@@ -35,7 +35,7 @@ class _LoginScreenBodyState extends State<LoginScreenBody> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        /// Top Image
+        /// الصورة العلوية
         Positioned(
           top: -40.h,
           left: 0,
@@ -50,7 +50,7 @@ class _LoginScreenBodyState extends State<LoginScreenBody> {
           ),
         ),
 
-        /// Form Container
+        /// حاوية النموذج
         Positioned(
           top: 200.h,
           left: 0,
@@ -65,106 +65,80 @@ class _LoginScreenBodyState extends State<LoginScreenBody> {
                 topRight: Radius.circular(35.r),
               ),
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomTextField(
-                    label: 'اسم المستخدم',
-                    hintText: 'ادخل اسم المستخدم',
-                    controller: userNameController,
-                    keyboardType: TextInputType.text,
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  /// Password مع isPassword بدل obscureText
-                  CustomTextField(
-                    label: 'كلمة المرور',
-                    hintText: 'ادخل كلمة المرور',
-                    controller: passwordController,
-                    isPassword: true,
-                  ),
-
-                  SizedBox(height: 6.h),
-
-                  /// Forgot Password
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ResetEmailScreen(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomTextField(
+                          label: 'اسم المستخدم',
+                          hintText: 'أدخل اسم المستخدم',
+                          controller: userNameController,
+                          keyboardType: TextInputType.text,
                         ),
-                      ),
-                      child: Text(
-                        'نسيت كلمة المرور؟',
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 12.sp,
+
+                        SizedBox(height: 20.h),
+
+                        CustomTextField(
+                          label: 'كلمة المرور',
+                          hintText: 'أدخل كلمة المرور',
+                          controller: passwordController,
+                          isPassword: true,
                         ),
-                      ),
-                    ),
-                  ),
 
-                  SizedBox(height: 15.h),
+                        SizedBox(height: 6.h),
 
-                  /// Login Button
-                  Obx(() => PrimaryButton(
-                        buttonText: controller.isLoading.value
-                            ? 'جاري التحميل...'
-                            : 'تسجيل الدخول',
-                        icon: SvgPicture.asset(
-                          AppAssets.iconarrow,
-                          width: 20.w,
-                          height: 20.h,
-                        ),
-                        onPress: controller.isLoading.value
-                            ? () {}
-                            : () => controller.login(
-                                  userNameController.text.trim(),
-                                  passwordController.text.trim(),
-                                ),
-                      )),
-
-                  SizedBox(height: 24.h),
-
-                  /// Divider
-                  Row(
-                    children: [
-                      const Expanded(child: Divider()),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w),
-                        child: Text(
-                          'تسجيل الدخول بواسطة',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.grey,
+                        /// نسيت كلمة المرور
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ResetEmailScreen(),
+                              ),
+                            ),
+                            child: Text(
+                              'نسيت كلمة المرور؟',
+                              style: TextStyle(
+                                color: Colors.orange,
+                                fontSize: 12.sp,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      const Expanded(child: Divider()),
-                    ],
+
+                        SizedBox(height: 15.h),
+
+                        /// زر تسجيل الدخول
+                        Obx(() => PrimaryButton(
+                              buttonText: controller.isLoading.value
+                                  ? 'جارٍ التحميل...'
+                                  : 'تسجيل الدخول',
+                              icon: SvgPicture.asset(
+                                AppAssets.iconarrow,
+                                width: 20.w,
+                                height: 20.h,
+                              ),
+                              onPress: controller.isLoading.value
+                                  ? () {}
+                                  : () => controller.login(
+                                        userNameController.text.trim(),
+                                        passwordController.text.trim(),
+                                      ),
+                            )),
+                      ],
+                    ),
                   ),
+                ),
 
-                  SizedBox(height: 20.h),
-
-                  /// Google Button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () => controller.loginWithGoogle(),
-                        child: _socialButton(AppAssets.GoogleIcon),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 24.h),
-
-                  /// Create Account
-                  Row(
+                /// إنشاء حساب - ثابتة في الأسفل
+                Padding(
+                  padding: EdgeInsets.only(bottom: 16.h),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
@@ -179,7 +153,7 @@ class _LoginScreenBodyState extends State<LoginScreenBody> {
                           ),
                         ),
                         child: Text(
-                          'أنشئ حساب جديد',
+                          'أنشئ حساباً جديداً',
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Colors.orange,
@@ -189,30 +163,12 @@ class _LoginScreenBodyState extends State<LoginScreenBody> {
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _socialButton(String image) {
-    return Container(
-      width: 55.w,
-      height: 55.h,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(12.w),
-        child: SvgPicture.asset(
-          image,
-          fit: BoxFit.contain,
-        ),
-      ),
     );
   }
 }

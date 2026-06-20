@@ -10,10 +10,6 @@ import 'package:graduationproject/core/widgets/custom_round_button.dart';
 import 'package:graduationproject/core/widgets/primary_button.dart';
 import 'package:graduationproject/features/voicetosign_screen/presentation_layer/voicetosignscreenview.dart';
 
-// ─────────────────────────────────────────
-// Models
-// ─────────────────────────────────────────
-
 class TextToSignResponse {
   final String? errorMessage;
   final List<List<String>> data;
@@ -47,10 +43,6 @@ class TextToSignResponse {
   }
 }
 
-// ─────────────────────────────────────────
-// Service
-// ─────────────────────────────────────────
-
 class TextToSignService {
   static const String _baseUrl = 'https://backup.ema2a.website';
 
@@ -59,9 +51,7 @@ class TextToSignService {
 
     final response = await http.post(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'Text': sentence}),
     );
 
@@ -74,18 +64,10 @@ class TextToSignService {
   }
 }
 
-// ─────────────────────────────────────────
-// Helper: decode base64 image string safely
-// ─────────────────────────────────────────
-
 Uint8List _decodeBase64Image(String raw) {
   final cleaned = raw.contains(',') ? raw.split(',').last : raw;
   return base64Decode(cleaned);
 }
-
-// ─────────────────────────────────────────
-// Screen
-// ─────────────────────────────────────────
 
 class TextToSignScreenBody extends StatefulWidget {
   const TextToSignScreenBody({super.key});
@@ -111,7 +93,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
     FocusScope.of(context).unfocus();
     final text = _controller.text.trim();
     if (text.isEmpty) {
-      setState(() => _errorText = 'من فضلك اكتب نص أولاً');
+      setState(() => _errorText = 'من فضلك اكتب نصًّا أولاً');
       return;
     }
 
@@ -142,11 +124,11 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
       child: SafeArea(
         child: Column(
           children: [
-            // Title
+            // العنوان
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               child: Text(
-                'تحويل النص الى لغة الاشارة',
+                'النص إلى لغة الإشارة',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.primaryColor,
@@ -156,7 +138,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
               ),
             ),
 
-            // Text Input
+            // حقل الكتابة
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Container(
@@ -178,7 +160,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
                   maxLines: null,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: 'اكتب.....',
+                    hintText: 'اكتب الجملة هنا...',
                     hintTextDirection: TextDirection.rtl,
                     hintStyle: TextStyle(
                       color: const Color(0xFFA9A9A9),
@@ -196,7 +178,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
 
             SizedBox(height: 14.h),
 
-            // Buttons Row
+            // أزرار
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
@@ -259,13 +241,13 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
 
             SizedBox(height: 24.h),
 
-            // Result Area
+            // منطقة النتائج
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: Column(
                   children: [
-                    // Error
+                    // رسالة الخطأ
                     if (_errorText != null)
                       Container(
                         width: double.infinity,
@@ -282,7 +264,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
                         ),
                       ),
 
-                    // Results Cards
+                    // بطاقات النتائج
                     if (_response != null &&
                         _response!.success &&
                         _response!.data.isNotEmpty)

@@ -4,14 +4,13 @@ import 'package:graduationproject/features/history_screen/presentation_layer/wid
 class HistoryView extends StatelessWidget {
   const HistoryView({super.key});
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('History'),
-        backgroundColor: const Color(0xFF30BBF9),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child:const HistoryBody(),
       ),
-      body: const HistoryBody(),
     );
   }
 }

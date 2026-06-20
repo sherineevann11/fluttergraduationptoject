@@ -140,7 +140,7 @@ class AuthController extends GetxController {
           colorText: Colors.white,
         );
 
-        // ── روح على الـ Search Screen مباشرة ──
+        // ── روح على الـ Home Screen مباشرة ──
         Get.offAll(() => const Homescreenview());
       } else {
         Get.snackbar(
@@ -167,11 +167,17 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _service.getUserProfile(accessToken.value);
+      print("Get User Profile - Status: ${response.statusCode}, Data: ${response.data}");
+
       if (response.statusCode == 200 && response.data['success'] == true) {
         return response.data['data'];
+      } else if (response.statusCode != null && response.statusCode! >= 500) {
+        print("Server error (${response.statusCode}): ${response.data}");
+        return null;
       }
       return null;
     } catch (e) {
+      print("Get User Profile Error: $e");
       return null;
     } finally {
       isLoading.value = false;
