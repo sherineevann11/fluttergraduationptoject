@@ -53,6 +53,8 @@ dependencies:
   record: ^5.1.0
   video_player: ^2.9.2
   file_picker: ^8.1.2
+  root_jailbreak_detector: ^0.5.4
+  package_info_plus: ^8.0.0
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -92,10 +94,9 @@ flutter:
   # https://flutter.dev/to/asset-from-package
 
   # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
+  # in the "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
+  # list giving the asset and other descriptors. For example:
   fonts:
     - family: Poppins
       fonts:
