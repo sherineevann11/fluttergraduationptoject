@@ -53,18 +53,18 @@ dependencies:
   record: ^5.1.0
   video_player: ^2.9.2
   file_picker: ^8.1.2
-  root_jailbreak_detector: ^0.5.4
   package_info_plus: ^8.0.0
 
 dev_dependencies:
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the analysis_options.yaml file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/loading image.png"
 
 # Fix for record_linux version incompatibility with record ^5.1.0
 dependency_overrides:

@@ -447,7 +447,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         title: Text(
           'إشارة إلى نص',
           style: TextStyle(
-            color: const Color(0xFF2BBBFA),
+            color: const Color(0xFF1A156C),
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
             fontFamily: 'Poppins',
@@ -474,7 +474,10 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                           _cameraController!.value.isInitialized
                       ? Transform.scale(scaleX: -1, child: CameraPreview(_cameraController!))
                       : Center(
-                          child: SvgPicture.asset(AppAssets.Camera, width: 60.w, height: 60.h),
+                          child: SvgPicture.asset(AppAssets.Camera, width: 60.w, height: 60.h,            colorFilter: const ColorFilter.mode(
+              Color(0xFF1A156C),
+              BlendMode.srcIn,
+            ),),
                         ),
                 ),
                 if (_isStreaming)
@@ -554,7 +557,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                         width: 140.w,
                         height: 39.h,
                         borderRadius: 19.r,
-                        buttonColor: _isStreaming ? Colors.grey : const Color(0xFF30BBF9),
+                        buttonColor: _isStreaming ? Colors.grey : const Color(0xFF1A156C),
                         onPress: _isStreaming ? _stopCamera : (_isConnected ? _startCamera : null),
                       ),
                       if (_isStreaming)
@@ -564,7 +567,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
                             child: Text(
                               'الكاميرا قيد التشغيل، جارٍ اكتشاف الحروف...',
                               style: TextStyle(
-                                color: const Color(0xFF5DBBFF),
+                                color: const Color(0xFF1A156C),
                                 fontSize: 12.sp,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w600,
@@ -621,7 +624,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
         shape: RoundedRectangleBorder(
           side: BorderSide(
             width: 1,
-            color: hasBorder ? const Color(0xFF5DBBFF) : Colors.transparent,
+            color: hasBorder ? const Color(0xFF1A156C) : Colors.transparent,
           ),
           borderRadius: BorderRadius.circular(35.r),
         ),
@@ -638,7 +641,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: const Color(0xFF005C99),
+                  color: const Color(0xFF1A156C),
                   fontSize: 12.sp,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
@@ -654,7 +657,7 @@ class _SigntotextscreenviewState extends State<Signtotextscreenview> {
               child: Text(
                 value,
                 style: TextStyle(
-                  color: const Color(0xFF005C99),
+                  color: const Color(0xFF1A156C),
                   fontSize: label != null ? 16.sp : 13.sp,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,

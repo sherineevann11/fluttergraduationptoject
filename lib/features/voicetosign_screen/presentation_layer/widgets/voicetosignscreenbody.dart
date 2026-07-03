@@ -261,7 +261,7 @@ class _State extends State<VoiceToSignScreenBody>
                         decoration: BoxDecoration(
                           color: _isRecording
                               ? Colors.red
-                              : const Color(0xFF30BBF9),
+                              : const Color(0xFF1A156C),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -302,7 +302,7 @@ class _State extends State<VoiceToSignScreenBody>
               Text(
                 _loadingStep,
                 style: TextStyle(
-                  color: const Color(0xFF2BBBFA),
+                  color: const Color(0xFF1A156C),
                   fontSize: 13.sp,
                 ),
               )
@@ -353,7 +353,7 @@ class _State extends State<VoiceToSignScreenBody>
                       ),
                       textColor: Colors.white,
                       buttonColor: const Color(0xFF276C8A),
-                      borderColor: const Color(0xFF44BCF0),
+                      borderColor: const Color(0xFF1A156C),
                       height: 48.h,
                       onPress: () => Navigator.pushReplacement(
                         context,
@@ -380,7 +380,7 @@ class _State extends State<VoiceToSignScreenBody>
                         child: Text(
                           _loadingStep,
                           style: TextStyle(
-                            color: const Color(0xFF2BBBFA),
+                            color: const Color(0xFF1A156C),
                             fontSize: 14.sp,
                           ),
                         ),
@@ -420,7 +420,7 @@ class _State extends State<VoiceToSignScreenBody>
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: const Color(0xFF5DBBFF),
+                                  color: const Color(0xFF1A156C),
                                   width: 1,
                                 ),
                                 boxShadow: [
@@ -439,14 +439,14 @@ class _State extends State<VoiceToSignScreenBody>
                                     children: [
                                       Icon(
                                         Icons.spellcheck,
-                                        color: const Color(0xFF30BBF9),
+                                        color: const Color(0xFF1A156C),
                                         size: 18.w,
                                       ),
                                       SizedBox(width: 4.w),
                                       Text(
                                         'كلمة ${idx + 1}',
                                         style: TextStyle(
-                                          color: const Color(0xFF30BBF9),
+                                          color: const Color(0xFF1A156C),
                                           fontSize: 16.sp,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -472,7 +472,7 @@ class _State extends State<VoiceToSignScreenBody>
                                             vertical: 4.h,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF98DCFA),
+                                            color: const Color(0xFF1A156C),
                                             borderRadius: BorderRadius.circular(16),
                                             boxShadow: [
                                               BoxShadow(
@@ -532,7 +532,7 @@ class _State extends State<VoiceToSignScreenBody>
             height: heights[i] * factor,
             margin: EdgeInsets.symmetric(horizontal: 3.w),
             decoration: BoxDecoration(
-              color: const Color(0xFF5DBBFF).withOpacity(0.7),
+              color: const Color(0xFF1A156C).withOpacity(0.7),
               borderRadius: BorderRadius.circular(4),
             ),
           );

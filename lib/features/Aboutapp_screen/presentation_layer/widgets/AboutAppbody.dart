@@ -309,7 +309,7 @@ class AboutScreenBody extends StatelessWidget {
           color: Colors.white.withOpacity(0.85),
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
-              color: const Color(0xFF5DBBFF).withOpacity(0.4)),
+              color: const Color(0xFF1A156C).withOpacity(0.4)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),

@@ -56,6 +56,27 @@ class AuthController extends GetxController {
         userName: cleanUserName,
         password: cleanPassword,
       );
+
+      // 🔍 مؤقتًا: عرض تفاصيل الرد كاملة عشان نشخص المشكلة
+      Get.dialog(
+        AlertDialog(
+          title: const Text('تفاصيل الرد (Debug)'),
+          content: SingleChildScrollView(
+            child: Text(
+              'Status Code: ${response.statusCode}\n\n'
+              'Response Type: ${response.data.runtimeType}\n\n'
+              'Response Data:\n${response.data}',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('تمام'),
+            ),
+          ],
+        ),
+      );
+
       if (response.statusCode == 200 && response.data['success'] == true) {
         final data = response.data['data'];
         accessToken.value = data['accessToken'];
@@ -72,11 +93,20 @@ class AuthController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar(
-        'خطأ',
-        'اسم المستخدم أو كلمة المرور غير صحيح',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      // 🔍 مؤقتًا: عرض الخطأ الحقيقي بدل الرسالة العامة
+      Get.dialog(
+        AlertDialog(
+          title: const Text('حصل استثناء (Debug)'),
+          content: SingleChildScrollView(
+            child: Text(e.toString()),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('تمام'),
+            ),
+          ],
+        ),
       );
     } finally {
       isLoading.value = false;

@@ -226,7 +226,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                                   userName: _usernameController.text,
                                 ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF30BBF9),
+                          backgroundColor: const Color(0xFF1A156C),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(35.r),
                           ),

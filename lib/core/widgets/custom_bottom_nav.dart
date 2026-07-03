@@ -28,7 +28,7 @@ class CustomBottomNavBar extends StatelessWidget {
   ),
 ],
       currentIndex: currentIndex,
-      selectedItemColor: const Color(0xFF248DBC),
+      selectedItemColor: const Color(0xFF1A156C),
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
       backgroundColor: Colors.white,

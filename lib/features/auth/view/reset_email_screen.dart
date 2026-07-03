@@ -72,7 +72,7 @@ actions: const [
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff30BBF9),
+                    backgroundColor: const Color(0xff1A156C),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(35),

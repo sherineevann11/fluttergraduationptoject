@@ -130,7 +130,7 @@ class _AccountBodyState extends State<AccountBody> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF30BBF9),
+                    backgroundColor: const Color(0xFF1A156C),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(35.r),
                     ),
@@ -176,7 +176,7 @@ class _AccountBodyState extends State<AccountBody> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Color(0xFFE8B86D),
-                    Color(0xFF30BBF9),
+                    Color(0xFF1A156C),
                   ],
                 ),
               ),
@@ -318,7 +318,7 @@ class _AccountBodyState extends State<AccountBody> {
             width: 40.w,
             height: 40.h,
             colorFilter: const ColorFilter.mode(
-              Color(0xFF248DBC),
+              Color(0xFF1A156C),
               BlendMode.srcIn,
             ),
           ),
@@ -344,6 +344,10 @@ class _AccountBodyState extends State<AccountBody> {
           AppAssets.darkModeIcon,
           width: 40.w,
           height: 40.h,
+           colorFilter: const ColorFilter.mode(
+              Color(0xFF1A156C),
+              BlendMode.srcIn,
+            ),
         ),
 
         SizedBox(width: 13.w),
@@ -362,7 +366,7 @@ class _AccountBodyState extends State<AccountBody> {
         Switch(
           value: false,
           onChanged: (value) {},
-          activeThumbColor: const Color(0xFF30BBF9),
+          activeThumbColor: const Color(0xFF1A156C),
         ),
       ],
     );

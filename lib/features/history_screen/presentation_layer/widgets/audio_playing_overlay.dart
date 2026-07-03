@@ -58,7 +58,7 @@ class _AudioPlayingOverlayState extends State<AudioPlayingOverlay>
           height: height,
           margin: const EdgeInsets.symmetric(horizontal: 2.5),
           decoration: BoxDecoration(
-            color: _accentColor.withOpacity(0.55 + value * 0.45),
+            color: const Color(0xFF1A156C).withOpacity(0.55 + value * 0.45),
             borderRadius: BorderRadius.circular(3),
           ),
         );
@@ -82,7 +82,7 @@ class _AudioPlayingOverlayState extends State<AudioPlayingOverlay>
                 height: 90,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _accentColor.withOpacity(0.18 * (1 - t)),
+                  color: const Color(0xFF1A156C).withOpacity(0.18 * (1 - t)),
                 ),
               ),
             ),
@@ -95,13 +95,13 @@ class _AudioPlayingOverlayState extends State<AudioPlayingOverlay>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      _accentColor.withOpacity(0.95),
-                      _accentColor.withOpacity(0.55),
+                      const Color(0xFF1A156C).withOpacity(0.95),
+                      const Color(0xFF1A156C).withOpacity(0.55),
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: _accentColor.withOpacity(0.4),
+                      color: const Color(0xFF1A156C).withOpacity(0.4),
                       blurRadius: 16,
                       spreadRadius: 2,
                     ),
@@ -136,7 +136,7 @@ class _AudioPlayingOverlayState extends State<AudioPlayingOverlay>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: _accentColor, width: 2),
+            border: Border.all(color: const Color(0xFF1A156C), width: 2),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.15),

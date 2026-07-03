@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart' as dio;
+import 'package:dio/io.dart' show IOHttpClientAdapter;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:url_launcher/url_launcher.dart';
 
 class AuthService {
@@ -14,6 +17,22 @@ class AuthService {
         validateStatus: (status) => status != null && status < 500,
       ),
     );
+
+    // 👇 عشان نشوف كل الـ requests والـ responses بالتفصيل
+    _dio.interceptors.add(dio.LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+      error: true,
+    ));
+
+    // ⚠️ للتعامل مع مشاكل SSL - يعمل فقط في debug mode
+    if (kDebugMode) {
+      (_dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
+          (client) {
+        client.badCertificateCallback = (cert, host, port) => true;
+        return client;
+      };
+    }
   }
 
   dio.Options _authOptions(String token) {

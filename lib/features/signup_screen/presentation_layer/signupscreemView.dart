@@ -23,7 +23,7 @@ class SignUpScreenView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: Color(0xff30BBF9),
+                color: Color(0xff1A156C),
               ),
             ),
           ),

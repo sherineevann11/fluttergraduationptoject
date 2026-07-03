@@ -44,7 +44,7 @@ class Searchscreenbody extends StatelessWidget {
                     buttonText: 'كيف يعمل ؟',
                     width: 272.w,
                     fontSize: 20.sp,
-                    buttonColor: const Color(0x2630BBF9),
+                    buttonColor: const Color(0x261A156C),
                     textColor: Colors.black,
                     onPress: () {
                       Navigator.of(context, rootNavigator: false).push(
@@ -64,7 +64,7 @@ class Searchscreenbody extends StatelessWidget {
                     buttonText: 'عن المشروع',
                     fontSize: 20.sp,
                     textColor: Colors.black,
-                    buttonColor: const Color(0x2630BBF9),
+                    buttonColor: const Color(0x261A156C),
                     width: 272.w,
                     onPress: () {
                       Navigator.of(context, rootNavigator: false).push(
@@ -82,7 +82,7 @@ class Searchscreenbody extends StatelessWidget {
                     buttonText: 'المعجم الارشادي',
                     fontSize: 20.sp,
                     width: 272.w,
-                    buttonColor: const Color(0x2630BBF9),
+                    buttonColor: const Color(0x251A156C),
                     textColor: Colors.black,
                     onPress: () {
                       Navigator.of(context, rootNavigator: false).push(

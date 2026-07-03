@@ -149,7 +149,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
                   color: const Color(0xFFD9D9D9).withOpacity(0.42),
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                    color: const Color(0xFF5DBBFF),
+                    color: const Color(0xFF1A156C),
                     width: 1,
                   ),
                 ),
@@ -230,7 +230,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
                             ),
                       textColor: Colors.white,
                       buttonColor: const Color(0xFF276C8A),
-                      borderColor: const Color(0xFF44BCF0),
+                      borderColor: const Color(0xFF1A156C),
                       height: 48.h,
                       onPress: _isLoading ? () {} : _convertText,
                     ),
@@ -284,7 +284,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12.r),
                                 border: Border.all(
-                                  color: const Color(0xFF5DBBFF),
+                                  color: const Color(0xFF1A156C),
                                   width: 1,
                                 ),
                                 boxShadow: [
@@ -303,14 +303,14 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
                                     children: [
                                       Icon(
                                         Icons.spellcheck,
-                                        color: const Color(0xFF30BBF9),
+                                        color: const Color(0xFF1A156C),
                                         size: 18.w,
                                       ),
                                       SizedBox(width: 4.w),
                                       Text(
                                         'كلمة ${wordIndex + 1}',
                                         style: TextStyle(
-                                          color: const Color(0xFF30BBF9),
+                                          color: const Color(0xFF1A156C),
                                           fontSize: 16.sp,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -339,7 +339,7 @@ class _TextToSignScreenBodyState extends State<TextToSignScreenBody> {
                                               vertical: 4.h,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFF98DCFA),
+                                              color: const Color(0xFF1A156C),
                                               borderRadius:
                                                   BorderRadius.circular(16.r),
                                               boxShadow: [

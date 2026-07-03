@@ -82,7 +82,7 @@ class OtpScreen extends StatelessWidget {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide:
-                              const BorderSide(color: Color(0xFF30BBF9)),
+                              const BorderSide(color: Color(0xFF1A156C)),
                         ),
                       ),
                       onChanged: (value) {
@@ -112,7 +112,7 @@ class OtpScreen extends StatelessWidget {
                             child: const Text(
                               "إعادة الإرسال",
                               style:
-                                  TextStyle(color: Color(0xFF30BBF9)),
+                                  TextStyle(color: Color(0xFF1A156C)),
                             ),
                           )
                         : Text(

@@ -22,7 +22,7 @@ class _HistoryBodyState extends State<HistoryBody> {
       body: SafeArea(
         child: Obx(
           () => historyController.isLoading.value
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFF30BBF9)))
+              ? const Center(child: CircularProgressIndicator(color: Color(0xFF1A156C)))
               : Column(
                   children: [
                     // ── Header ──
@@ -103,7 +103,7 @@ class _HistoryBodyState extends State<HistoryBody> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.history, size: 80.sp, color: const Color(0xFF30BBF9)),
+                                  Icon(Icons.history, size: 80.sp, color: const Color(0xFF1A156C)),
                                   SizedBox(height: 16.h),
                                   Text(
                                     'لا توجد سجلات',
@@ -146,7 +146,7 @@ class _HistoryBodyState extends State<HistoryBody> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: const Color(0xFF5DBBFF), width: 1),
+          border: Border.all(color: const Color(0xFF1A156C), width: 1),
           boxShadow: const [
             BoxShadow(
               color: Color(0x3F000000),
@@ -171,7 +171,7 @@ class _HistoryBodyState extends State<HistoryBody> {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'Poppins',
-                      color: const Color(0xFF2BBBFB),
+                      color: const Color(0xFF1A156C),
                     ),
                   ),
                 ),
@@ -185,7 +185,7 @@ class _HistoryBodyState extends State<HistoryBody> {
                           height: 31.h,
                           child: const CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Color(0xFF248DBC),
+                            color: Color(0xFF1A156C),
                           ),
                         )
                       : SvgPicture.asset(

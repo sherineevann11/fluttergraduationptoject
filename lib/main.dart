@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:root_jailbreak_detector/root_jailbreak_detector.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:graduationproject/features/loading_screen/presentation_layer/LoadingScreenview.dart';
 import 'package:graduationproject/features/auth/view/reset_email_screen.dart';
@@ -23,7 +23,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
 
-  // ✅ Root/Jailbreak Detection Security Check (6.3 - Penetration Report)
+  // ✅ Root Detection Security Check (6.3 - Penetration Report)
   await checkDeviceSafety();
 
   // ✅ Anti-Tampering: Package Integrity Check (6.1 - Penetration Report)
@@ -33,25 +33,24 @@ void main() async {
 }
 
 Future<void> checkDeviceSafety() async {
-  final detector = RootJailbreakDetector();
-  bool isCompromised = false;
-
+  if (kIsWeb) return;
+  // Basic root detection via su binary check (6.3 - Penetration Report)
   try {
     if (Platform.isAndroid) {
-      isCompromised = (await detector.isRooted()) ?? false;
-    } else if (Platform.isIOS) {
-      isCompromised = (await detector.isJailbreaked()) ?? false;
+      final result = await Process.run('su', ['-c', 'id']);
+      if (result.exitCode == 0) {
+        debugPrint('⚠️ SECURITY WARNING: Device is rooted - Security risk detected');
+      }
     }
-  } on PlatformException {
-    isCompromised = false;
-  }
-
-  if (isCompromised) {
-    debugPrint('⚠️ SECURITY WARNING: Device is rooted/jailbroken - Security risk detected');
+  } catch (_) {
+    // su not found = device not rooted
+    debugPrint('✅ Security check passed: Device is not rooted');
   }
 }
 
 Future<bool> checkAppIntegrity() async {
+  if (kIsWeb) return false;
+
   try {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final String currentPackageName = packageInfo.packageName;

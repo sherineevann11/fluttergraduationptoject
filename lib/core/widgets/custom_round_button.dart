@@ -60,7 +60,7 @@ class CustomRoundButton extends StatelessWidget {
               buttonText,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: textColor ?? const Color(0xFF30BBF9),
+                color: textColor ?? const Color(0xFF1A156C),
                 fontSize: fontSize ?? 16.sp,
                 fontFamily: AppFonts.mainfontName,
                 fontWeight: fontWeight ?? FontWeight.w600,

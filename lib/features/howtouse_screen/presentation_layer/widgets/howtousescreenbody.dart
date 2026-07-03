@@ -16,7 +16,7 @@ class _HowToUsescreenbodyState extends State<HowToUsescreenbody> {
     _FeatureData(
       icon: Icons.mic_rounded,
       title: 'صوت إلى إشارة',
-      color: Color(0xFF30BBF9),
+      color: Color(0xFF1A156C),
       steps: [
         _StepData(icon: Icons.touch_app_rounded, text: 'اضغط على زرار الميكروفون'),
         _StepData(icon: Icons.mic_rounded, text: 'ابدأ تتكلم بالعربي بوضوح'),
@@ -40,7 +40,7 @@ class _HowToUsescreenbodyState extends State<HowToUsescreenbody> {
     _FeatureData(
       icon: Icons.camera_alt_rounded,
       title: 'إشارة إلى نص',
-      color: Color(0xFF5DBBFF),
+      color: Color(0xFF1A156C),
       steps: [
         _StepData(icon: Icons.wifi_rounded, text: 'تأكد إن عندك إنترنت كويس'),
         _StepData(icon: Icons.videocam_rounded, text: 'اضغط "شغل الكاميرا"'),
@@ -54,7 +54,7 @@ class _HowToUsescreenbodyState extends State<HowToUsescreenbody> {
     _FeatureData(
       icon: Icons.menu_book_rounded,
       title: 'المعجم',
-      color: Color(0xFF1A8FBF),
+      color: Color(0xFF1A156C),
       steps: [
         _StepData(icon: Icons.search_rounded, text: 'دور على الحرف أو الكلمة اللي عايزها'),
         _StepData(icon: Icons.touch_app_rounded, text: 'اضغط عليها عشان تشوف صورة الإشارة'),
